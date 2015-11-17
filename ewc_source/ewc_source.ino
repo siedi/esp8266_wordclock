@@ -13,8 +13,6 @@
 #include "ewc_ntp.h"
 #include "ewc_display.h"
 
-long waitUntilLDR = 0;
-
 WebConfig* pWebConfig;
 
 // IR Remote https://github.com/markszabo/IRremoteESP8266

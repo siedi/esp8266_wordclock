@@ -1,7 +1,6 @@
-// most of the stuff in here is based the idea and borrowed from https://backes-markus.de/blog/2014/02/diy-rgb-strip-wordclock/
+// most of the stuff in here is based on the idea of and borrowed from https://backes-markus.de/blog/2014/02/diy-rgb-strip-wordclock/
 #include "ewc_display.h"
 #include "ewc_def.h"
-// #include <functional>
 
 int EWCDisplay::_led_strip[NUM_LEDS];
 int EWCDisplay::_stackptr = 0;
@@ -29,6 +28,7 @@ EWCDisplay::~EWCDisplay(){
   
 }
 
+// TODO get rid of and replace with fastled function
 RgbColor EWCDisplay::_CHSV(unsigned char h, unsigned char s, unsigned char v) {
   typedef struct rgb
   {
@@ -148,254 +148,82 @@ void EWCDisplay::_pushToStrip(int ledId) {
   _stackptr++;
 }
 
-///////////////////////
-//PUSH WORD HELPER
-///////////////////////
-void EWCDisplay::_pushES_IST()  {
-  _pushToStrip(L9);
-  _pushToStrip(L10);
-  _pushToStrip(L30);
-  _pushToStrip(L49);
-  _pushToStrip(L50);
-}
-
-void EWCDisplay::_pushFUENF1() {
-  _pushToStrip(L70);
-  _pushToStrip(L89);
-  _pushToStrip(L90);
-  _pushToStrip(L109);
-}
-
-void EWCDisplay::_pushFUENF2() {
-  _pushToStrip(L74);
-  _pushToStrip(L85);
-  _pushToStrip(L94);
-  _pushToStrip(L105);
-}
-
-void EWCDisplay::_pushNACH() {
-  _pushToStrip(L73);
-  _pushToStrip(L86);
-  _pushToStrip(L93);
-  _pushToStrip(L106);
-}
-
-void EWCDisplay::_pushZEHN1() {
-  _pushToStrip(L8);
-  _pushToStrip(L11);
-  _pushToStrip(L28);
-  _pushToStrip(L31);
-}
-
-void EWCDisplay::_pushVIERTEL() {
-  _pushToStrip(L47);
-  _pushToStrip(L52);
-  _pushToStrip(L67);
-  _pushToStrip(L72);
-  _pushToStrip(L87);
-  _pushToStrip(L92);
-  _pushToStrip(L107);
-}
-
-void EWCDisplay::_pushVOR() {
-  _pushToStrip(L6);
-  _pushToStrip(L13);
-  _pushToStrip(L26);
-}
-
-void EWCDisplay::_pushHALB() {
-  _pushToStrip(L5);
-  _pushToStrip(L14);
-  _pushToStrip(L25);
-  _pushToStrip(L34);
-}
-
-void EWCDisplay::_pushONE() {
-  _pushToStrip(L113);
-}
-
-void EWCDisplay::_pushTWO() {
-  _pushToStrip(L110);
-}
-
-void EWCDisplay::_pushTHREE() {
-  _pushToStrip(L111);
-}
-
-void EWCDisplay::_pushFOUR() {
-  _pushToStrip(L112);
-}
-
-void EWCDisplay::_pushZWANZIG() {
-  _pushToStrip(L48);
-  _pushToStrip(L51);
-  _pushToStrip(L68);
-  _pushToStrip(L71);
-  _pushToStrip(L88);
-  _pushToStrip(L91);
-  _pushToStrip(L108);
-}
-
-void EWCDisplay::_pushZWOELF() {
-  _pushToStrip(L61);
-  _pushToStrip(L78);
-  _pushToStrip(L81);
-  _pushToStrip(L98);
-  _pushToStrip(L101);
-}
-
-void EWCDisplay::_pushEINS(bool s) {
-  _pushToStrip(L4);
-  _pushToStrip(L15);
-  _pushToStrip(L24);
-  if (s) {
-    _pushToStrip(L35);
+void EWCDisplay::_pushToStrip(int leds[], uint8_t size) {
+  for(int i = 0; i < size; i++) {
+    _pushToStrip(leds[i]);
   }
 }
 
-void EWCDisplay::_pushZWEI() {
-  _pushToStrip(L75);
-  _pushToStrip(L84);
-  _pushToStrip(L95);
-  _pushToStrip(L104);
-}
-
-void EWCDisplay::_pushDREI() {
-  _pushToStrip(L3);
-  _pushToStrip(L16);
-  _pushToStrip(L23);
-  _pushToStrip(L36);
-}
-
-void EWCDisplay::_pushVIER() {
-  _pushToStrip(L76);
-  _pushToStrip(L83);
-  _pushToStrip(L96);
-  _pushToStrip(L103);
-}
-
-void EWCDisplay::_pushSECHS() {
-  _pushToStrip(L2);
-  _pushToStrip(L17);
-  _pushToStrip(L22);
-  _pushToStrip(L37);
-  _pushToStrip(L42);
-}
-
-void EWCDisplay::_pushSIEBEN() {
-  _pushToStrip(L1);
-  _pushToStrip(L18);
-  _pushToStrip(L21);
-  _pushToStrip(L38);
-  _pushToStrip(L41);
-  _pushToStrip(L58);
-}
-
-void EWCDisplay::_pushACHT() {
-  _pushToStrip(L77);
-  _pushToStrip(L82);
-  _pushToStrip(L97);
-  _pushToStrip(L102);
-}
-
-void EWCDisplay::_pushNEUN() {
-  _pushToStrip(L39);
-  _pushToStrip(L40);
-  _pushToStrip(L59);
-  _pushToStrip(L60);
-}
-
-void EWCDisplay::_pushZEHN() {
-  _pushToStrip(L0);
-  _pushToStrip(L19);
-  _pushToStrip(L20);
-  _pushToStrip(L39);
-}
-
-void EWCDisplay::_pushELF() {
-  _pushToStrip(L54);
-  _pushToStrip(L65);
-  _pushToStrip(L74);
-}
-
-void EWCDisplay::_pushUHR() {
-  _pushToStrip(L80);
-  _pushToStrip(L99);
-  _pushToStrip(L100);
-}
-///////////////////////
-
 void EWCDisplay::_timeToStrip(uint8_t hours, uint8_t minutes) {
-  _pushES_IST();
+  STRIP_PRINT(W_ES_IST)
 
-  //show minutes
   if (minutes >= 5 && minutes < 10) {
-    _pushFUENF1();
-    _pushNACH();
+    STRIP_PRINT(W_FUENF1)
+    STRIP_PRINT(W_NACH)
   } else if (minutes >= 10 && minutes < 15) {
-    _pushZEHN1();
-    _pushNACH();
+    STRIP_PRINT(W_ZEHN1)
+    STRIP_PRINT(W_NACH)
   } else if (minutes >= 15 && minutes < 20) {
-    _pushVIERTEL();
-    _pushNACH();
+    STRIP_PRINT(W_VIERTEL)
+    STRIP_PRINT(W_NACH)
   } else if (minutes >= 20 && minutes < 25) {
     if (_language_mode == RHEIN_RUHR_MODE) {
-      _pushZWANZIG();
-      _pushNACH();
+      STRIP_PRINT(W_ZWANZIG)
+      STRIP_PRINT(W_NACH)
     } else if (_language_mode == WESSI_MODE) {
-      _pushZEHN1();
-      _pushVOR();
-      _pushHALB();
+      STRIP_PRINT(W_ZEHN1)
+      STRIP_PRINT(W_VOR)
+      STRIP_PRINT(W_HALB)
     }
   } else if (minutes >= 25 && minutes < 30) {
-    _pushFUENF1();
-    _pushVOR();
-    _pushHALB();
+    STRIP_PRINT(W_FUENF1)
+    STRIP_PRINT(W_VOR)
+    STRIP_PRINT(W_HALB)
   } else if (minutes >= 30 && minutes < 35) {
-    _pushHALB();
+    STRIP_PRINT(W_HALB)
   } else if (minutes >= 35 && minutes < 40) {
-    _pushFUENF1();
-    _pushNACH();
-    _pushHALB();
+    STRIP_PRINT(W_FUENF1)
+    STRIP_PRINT(W_NACH)
+    STRIP_PRINT(W_HALB)
   } else if (minutes >= 40 && minutes < 45) {
     if (_language_mode == RHEIN_RUHR_MODE) {
-      _pushZWANZIG();
-      _pushVOR();
+      STRIP_PRINT(W_ZWANZIG)
+      STRIP_PRINT(W_VOR)
     } else if (_language_mode == WESSI_MODE) {
-      _pushZEHN1();
-      _pushNACH();
-      _pushHALB();
+      STRIP_PRINT(W_ZEHN1)
+      STRIP_PRINT(W_NACH)
+      STRIP_PRINT(W_HALB)
     }
   } else if (minutes >= 45 && minutes < 50) {
-    _pushVIERTEL();
-    _pushVOR();
+    STRIP_PRINT(W_VIERTEL)
+    STRIP_PRINT(W_VOR)
   } else if (minutes >= 50 && minutes < 55) {
-    _pushZEHN1();
-    _pushVOR();
+    STRIP_PRINT(W_ZEHN1)
+    STRIP_PRINT(W_VOR)
   } else if (minutes >= 55 && minutes < 60) {
-    _pushFUENF1();
-    _pushVOR();
+    STRIP_PRINT(W_FUENF1)
+    STRIP_PRINT(W_VOR)
   }
 
   int singleMinutes = minutes % 5;
   switch (singleMinutes) {
     case 1:
-      _pushONE();
+      STRIP_PRINT(W_ONE)
       break;
     case 2:
-      _pushONE();
-      _pushTWO();
+      STRIP_PRINT(W_ONE)
+      STRIP_PRINT(W_TWO)
       break;
     case 3:
-      _pushONE();
-      _pushTWO();
-      _pushTHREE();
+      STRIP_PRINT(W_ONE)
+      STRIP_PRINT(W_TWO)
+      STRIP_PRINT(W_THREE)
       break;
     case 4:
-      _pushONE();
-      _pushTWO();
-      _pushTHREE();
-      _pushFOUR();
+      STRIP_PRINT(W_ONE)
+      STRIP_PRINT(W_TWO)
+      STRIP_PRINT(W_THREE)
+      STRIP_PRINT(W_FOUR)
       break;
   }
 
@@ -420,50 +248,50 @@ void EWCDisplay::_timeToStrip(uint8_t hours, uint8_t minutes) {
   //show hours
   switch (hours) {
     case 0:
-      _pushZWOELF();
+      STRIP_PRINT(W_ZWOELF)
       break;
     case 1:
       if (minutes > 4) {
-        _pushEINS(true);
+        STRIP_PRINT(W_EINS)
       } else {
-        _pushEINS(false);
+        STRIP_PRINT(W_EIN)
       }
       break;
     case 2:
-      _pushZWEI();
+      STRIP_PRINT(W_ZWEI)
       break;
     case 3:
-      _pushDREI();
+      STRIP_PRINT(W_DREI)
       break;
     case 4:
-      _pushVIER();
+      STRIP_PRINT(W_VIER)
       break;
     case 5:
-      _pushFUENF2();
+      STRIP_PRINT(W_FUENF2)
       break;
     case 6:
-      _pushSECHS();
+      STRIP_PRINT(W_SECHS)
       break;
     case 7:
-      _pushSIEBEN();
+      STRIP_PRINT(W_SIEBEN)
       break;
     case 8:
-      _pushACHT();
+      STRIP_PRINT(W_ACHT)
       break;
     case 9:
-      _pushNEUN();
+      STRIP_PRINT(W_NEUN)
       break;
     case 10:
-      _pushZEHN();
+      STRIP_PRINT(W_ZEHN)
       break;
     case 11:
-      _pushELF();
+      STRIP_PRINT(W_ELF)
       break;
   }
 
   //show uhr
   if (minutes < 5) {
-    _pushUHR();
+    STRIP_PRINT(W_UHR)
   }
 }
 
@@ -606,7 +434,7 @@ void EWCDisplay::testAll() {
 }
 
 void EWCDisplay::fastTest() {
-  DEBUG_PRINT(F("FAST TEST..."));
+  DEBUG_PRINTLN(F("FAST TEST..."));
   if (!_led_bus.IsAnimating()) {
     _auto_brightness_enabled = false;
     if (_testMinutes >= 60) {
@@ -626,7 +454,7 @@ void EWCDisplay::fastTest() {
 }
 
 void EWCDisplay::makeParty() {
-  DEBUG_PRINT(F("PARTY YEAH..."));
+  DEBUG_PRINTLN(F("PARTY YEAH..."));
   if (!_led_bus.IsAnimating()) {
     _auto_brightness_enabled = false;
     _resetAndBlack();

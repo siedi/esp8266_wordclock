@@ -54,38 +54,12 @@ class EWCDisplay
     static void _displayStrip(RgbColor colorCode);
     static void _displayStripRandomColor() ;
     static void _pushToStrip(int ledId);
-    static void _pushES_IST();
-    static void _pushFUENF1();
-    static void _pushFUENF2();
-    static void _pushNACH();
-    static void _pushZEHN1();
-    static void _pushVIERTEL();
-    static void _pushVOR();
-    static void _pushHALB();
-    static void _pushONE();
-    static void _pushTWO();
-    static void _pushTHREE();
-    static void _pushFOUR();
-    static void _pushZWANZIG();
-    static void _pushZWOELF();
-    static void _pushEINS(bool s);
-    static void _pushZWEI();
-    static void _pushDREI();
-    static void _pushVIER();
-    static void _pushSECHS();
-    static void _pushSIEBEN();
-    static void _pushACHT();
-    static void _pushNEUN();
-    static void _pushZEHN();
-    static void _pushELF();
-    static void _pushUHR();
+    static void _pushToStrip(int leds[], uint8_t size);
     static void _timeToStrip(uint8_t hours, uint8_t minutes);
     static void _triggerLedAnim();
     static void _startLedAnim();
-    
 };
 
 extern EWCDisplay Display;
 
 #endif
-

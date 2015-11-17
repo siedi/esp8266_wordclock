@@ -19,4 +19,3 @@ class EWCNtp
 extern EWCNtp NTP;
 
 #endif
-
