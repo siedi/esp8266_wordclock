@@ -20,7 +20,8 @@ Have fun.
   * [NeoPixelBus](https://github.com/Makuna/NeoPixelBus), unfortunately the Fastled-lib is not available for the ESP8266 yet.
   * [IRremoteESP8266](https://github.com/markszabo/IRremoteESP8266), obviously for the IR remote if you want to use one.
 4. Clone the repository and open ewc_source.ino.
-5. Compile and upload to your ESP8266 (I'm using the -12 module with the 4MB flash)
+5. Make your changes / settings in ewc_def.h
+6. Compile and upload to your ESP8266 (I'm using the -12 module with the 4MB flash)
 
 ## TODO
 * Refactor code (I'm not a C/C++ developer, if someone can help, please PM me)
