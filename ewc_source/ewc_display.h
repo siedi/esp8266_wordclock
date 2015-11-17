@@ -9,7 +9,6 @@
 class EWCDisplay
 {
   public:
-
     EWCDisplay();
     ~EWCDisplay();
     bool begin();
