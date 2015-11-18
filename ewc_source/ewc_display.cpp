@@ -6,6 +6,10 @@ int EWCDisplay::_led_strip[NUM_LEDS];
 int EWCDisplay::_stackptr = 0;
 uint8_t EWCDisplay::_testHours = 0;
 uint8_t EWCDisplay::_testMinutes = 0;
+#if FEATURE_WEATHER()
+int8_t EWCDisplay::_testTemperature = -39;
+uint8_t EWCDisplay::_testWeather = 0;
+#endif
 uint8_t EWCDisplay::_testLED = 0;
 uint8_t EWCDisplay::_language_mode = RHEIN_RUHR_MODE;
 boolean EWCDisplay::_auto_brightness_enabled = false;
@@ -155,75 +159,75 @@ void EWCDisplay::_pushToStrip(int leds[], uint8_t size) {
 }
 
 void EWCDisplay::_timeToStrip(uint8_t hours, uint8_t minutes) {
-  STRIP_PRINT(W_ES_IST)
+  STRIP_PRINT(W1_ES_IST)
 
   if (minutes >= 5 && minutes < 10) {
-    STRIP_PRINT(W_FUENF1)
-    STRIP_PRINT(W_NACH)
+    STRIP_PRINT(W1_FUENF1)
+    STRIP_PRINT(W1_NACH)
   } else if (minutes >= 10 && minutes < 15) {
-    STRIP_PRINT(W_ZEHN1)
-    STRIP_PRINT(W_NACH)
+    STRIP_PRINT(W1_ZEHN1)
+    STRIP_PRINT(W1_NACH)
   } else if (minutes >= 15 && minutes < 20) {
-    STRIP_PRINT(W_VIERTEL)
-    STRIP_PRINT(W_NACH)
+    STRIP_PRINT(W1_VIERTEL)
+    STRIP_PRINT(W1_NACH)
   } else if (minutes >= 20 && minutes < 25) {
     if (_language_mode == RHEIN_RUHR_MODE) {
-      STRIP_PRINT(W_ZWANZIG)
-      STRIP_PRINT(W_NACH)
+      STRIP_PRINT(W1_ZWANZIG)
+      STRIP_PRINT(W1_NACH)
     } else if (_language_mode == WESSI_MODE) {
-      STRIP_PRINT(W_ZEHN1)
-      STRIP_PRINT(W_VOR)
-      STRIP_PRINT(W_HALB)
+      STRIP_PRINT(W1_ZEHN1)
+      STRIP_PRINT(W1_VOR)
+      STRIP_PRINT(W1_HALB)
     }
   } else if (minutes >= 25 && minutes < 30) {
-    STRIP_PRINT(W_FUENF1)
-    STRIP_PRINT(W_VOR)
-    STRIP_PRINT(W_HALB)
+    STRIP_PRINT(W1_FUENF1)
+    STRIP_PRINT(W1_VOR)
+    STRIP_PRINT(W1_HALB)
   } else if (minutes >= 30 && minutes < 35) {
-    STRIP_PRINT(W_HALB)
+    STRIP_PRINT(W1_HALB)
   } else if (minutes >= 35 && minutes < 40) {
-    STRIP_PRINT(W_FUENF1)
-    STRIP_PRINT(W_NACH)
-    STRIP_PRINT(W_HALB)
+    STRIP_PRINT(W1_FUENF1)
+    STRIP_PRINT(W1_NACH)
+    STRIP_PRINT(W1_HALB)
   } else if (minutes >= 40 && minutes < 45) {
     if (_language_mode == RHEIN_RUHR_MODE) {
-      STRIP_PRINT(W_ZWANZIG)
-      STRIP_PRINT(W_VOR)
+      STRIP_PRINT(W1_ZWANZIG)
+      STRIP_PRINT(W1_VOR)
     } else if (_language_mode == WESSI_MODE) {
-      STRIP_PRINT(W_ZEHN1)
-      STRIP_PRINT(W_NACH)
-      STRIP_PRINT(W_HALB)
+      STRIP_PRINT(W1_ZEHN1)
+      STRIP_PRINT(W1_NACH)
+      STRIP_PRINT(W1_HALB)
     }
   } else if (minutes >= 45 && minutes < 50) {
-    STRIP_PRINT(W_VIERTEL)
-    STRIP_PRINT(W_VOR)
+    STRIP_PRINT(W1_VIERTEL)
+    STRIP_PRINT(W1_VOR)
   } else if (minutes >= 50 && minutes < 55) {
-    STRIP_PRINT(W_ZEHN1)
-    STRIP_PRINT(W_VOR)
+    STRIP_PRINT(W1_ZEHN1)
+    STRIP_PRINT(W1_VOR)
   } else if (minutes >= 55 && minutes < 60) {
-    STRIP_PRINT(W_FUENF1)
-    STRIP_PRINT(W_VOR)
+    STRIP_PRINT(W1_FUENF1)
+    STRIP_PRINT(W1_VOR)
   }
 
   int singleMinutes = minutes % 5;
   switch (singleMinutes) {
     case 1:
-      STRIP_PRINT(W_ONE)
+      STRIP_PRINT(W1_ONE)
       break;
     case 2:
-      STRIP_PRINT(W_ONE)
-      STRIP_PRINT(W_TWO)
+      STRIP_PRINT(W1_ONE)
+      STRIP_PRINT(W1_TWO)
       break;
     case 3:
-      STRIP_PRINT(W_ONE)
-      STRIP_PRINT(W_TWO)
-      STRIP_PRINT(W_THREE)
+      STRIP_PRINT(W1_ONE)
+      STRIP_PRINT(W1_TWO)
+      STRIP_PRINT(W1_THREE)
       break;
     case 4:
-      STRIP_PRINT(W_ONE)
-      STRIP_PRINT(W_TWO)
-      STRIP_PRINT(W_THREE)
-      STRIP_PRINT(W_FOUR)
+      STRIP_PRINT(W1_ONE)
+      STRIP_PRINT(W1_TWO)
+      STRIP_PRINT(W1_THREE)
+      STRIP_PRINT(W1_FOUR)
       break;
   }
 
@@ -248,52 +252,168 @@ void EWCDisplay::_timeToStrip(uint8_t hours, uint8_t minutes) {
   //show hours
   switch (hours) {
     case 0:
-      STRIP_PRINT(W_ZWOELF)
+      STRIP_PRINT(W1_ZWOELF)
       break;
     case 1:
       if (minutes > 4) {
-        STRIP_PRINT(W_EINS)
+        STRIP_PRINT(W1_EINS)
       } else {
-        STRIP_PRINT(W_EIN)
+        STRIP_PRINT(W1_EIN)
       }
       break;
     case 2:
-      STRIP_PRINT(W_ZWEI)
+      STRIP_PRINT(W1_ZWEI)
       break;
     case 3:
-      STRIP_PRINT(W_DREI)
+      STRIP_PRINT(W1_DREI)
       break;
     case 4:
-      STRIP_PRINT(W_VIER)
+      STRIP_PRINT(W1_VIER)
       break;
     case 5:
-      STRIP_PRINT(W_FUENF2)
+      STRIP_PRINT(W1_FUENF2)
       break;
     case 6:
-      STRIP_PRINT(W_SECHS)
+      STRIP_PRINT(W1_SECHS)
       break;
     case 7:
-      STRIP_PRINT(W_SIEBEN)
+      STRIP_PRINT(W1_SIEBEN)
       break;
     case 8:
-      STRIP_PRINT(W_ACHT)
+      STRIP_PRINT(W1_ACHT)
       break;
     case 9:
-      STRIP_PRINT(W_NEUN)
+      STRIP_PRINT(W1_NEUN)
       break;
     case 10:
-      STRIP_PRINT(W_ZEHN)
+      STRIP_PRINT(W1_ZEHN)
       break;
     case 11:
-      STRIP_PRINT(W_ELF)
+      STRIP_PRINT(W1_ELF)
       break;
   }
 
   //show uhr
   if (minutes < 5) {
-    STRIP_PRINT(W_UHR)
+    STRIP_PRINT(W1_UHR)
   }
 }
+
+#if FEATURE_WEATHER()
+void EWCDisplay::_weatherToStrip(int8_t temperature, uint8_t weather) {
+  STRIP_PRINT(W2_HEUTE)
+  STRIP_PRINT(W2_WIRD)
+  STRIP_PRINT(W2_ES)
+
+  if (temperature < 0) {
+    STRIP_PRINT(W2_MINUS)
+  }
+
+  switch ((int)(abs(temperature) / 5)) {
+    case 0:
+      STRIP_PRINT(W2_NULL)
+      break;
+    case 1:
+      STRIP_PRINT(W2_FUENF)
+      break;   
+    case 2:
+      STRIP_PRINT(W2_ZEHN)
+      break;
+    case 3:
+      STRIP_PRINT(W2_FUENF)
+      STRIP_PRINT(W2_ZEHN)
+      break;
+    case 4:
+      STRIP_PRINT(W2_ZWANZIG)
+      break;
+    case 5:
+      STRIP_PRINT(W2_FUENF)
+      STRIP_PRINT(W2_UND)
+      STRIP_PRINT(W2_ZWANZIG)
+      break;
+    case 6:
+      STRIP_PRINT(W2_DREISSIG)
+      break;
+    case 7:
+      STRIP_PRINT(W2_FUENF)
+      STRIP_PRINT(W2_UND)
+      STRIP_PRINT(W2_DREISSIG)
+      break;
+  }
+
+  switch (abs(temperature) % 5) {
+    case 1:
+      STRIP_PRINT(W2_ONE)
+      break;
+    case 2:
+      STRIP_PRINT(W2_ONE)
+      STRIP_PRINT(W2_TWO)
+      break;
+    case 3:
+      STRIP_PRINT(W2_ONE)
+      STRIP_PRINT(W2_TWO)
+      STRIP_PRINT(W2_THREE)
+      break;
+    case 4:
+      STRIP_PRINT(W2_ONE)
+      STRIP_PRINT(W2_TWO)
+      STRIP_PRINT(W2_THREE)
+      STRIP_PRINT(W2_FOUR)
+      break;
+  }
+
+  if (abs(temperature) > 39) {
+      STRIP_PRINT(W2_FUENF)
+      STRIP_PRINT(W2_UND)
+      STRIP_PRINT(W2_DREISSIG)
+      STRIP_PRINT(W2_ONE)
+      STRIP_PRINT(W2_TWO)
+      STRIP_PRINT(W2_THREE)
+      STRIP_PRINT(W2_FOUR)
+  }
+
+  STRIP_PRINT(W2_GRAD)
+  
+  if (weather > 0) {
+    STRIP_PRINT(W2_UND2)
+
+    switch (weather) {
+      case WEATHER_SONNE:
+        STRIP_PRINT(W2_SONNE)
+        break;
+      case WEATHER_NEBEL:
+        STRIP_PRINT(W2_NEBEL)
+        break;
+      case WEATHER_WOLKEN:
+        STRIP_PRINT(W2_WOLKEN)
+        break;
+      case WEATHER_SONNEMITWOLKEN:
+        STRIP_PRINT(W2_SONNE)
+        STRIP_PRINT(W2_MIT)
+        STRIP_PRINT(W2_WOLKEN)
+        break;      
+      case WEATHER_NIESEL:
+        STRIP_PRINT(W2_NIESEL)
+        break;
+      case WEATHER_SCHNEE:
+        STRIP_PRINT(W2_SCHNEE)
+        break;       
+      case WEATHER_REGEN:
+        STRIP_PRINT(W2_REGEN)
+        break;
+      case WEATHER_SCHNEEREGEN:
+        STRIP_PRINT(W2_SCHNEE)
+        STRIP_PRINT(W2_REGEN)
+        break;
+      case WEATHER_STURM:
+        STRIP_PRINT(W2_STURM)
+        break; 
+    }
+    STRIP_PRINT(W2_GEBEN)   
+  }
+
+}
+#endif
 
 void EWCDisplay::_triggerLedAnim() {
   if (_led_bus.IsAnimating())
@@ -389,21 +509,10 @@ void EWCDisplay::showHeart() {
   if (!_led_bus.IsAnimating()) {
     _auto_brightness_enabled = false;
     _resetAndBlack();
-    _pushToStrip(L29);  _pushToStrip(L30);  _pushToStrip(L70);  _pushToStrip(L89);
-    _pushToStrip(L11);  _pushToStrip(L48);  _pushToStrip(L68);  _pushToStrip(L91);
-    _pushToStrip(L7);   _pushToStrip(L52);  _pushToStrip(L107);
-    _pushToStrip(L6);   _pushToStrip(L106);
-    _pushToStrip(L5);   _pushToStrip(L105);
-    _pushToStrip(L15);  _pushToStrip(L95);
-    _pushToStrip(L23);  _pushToStrip(L83);
-    _pushToStrip(L37);  _pushToStrip(L77);
-    _pushToStrip(L41);  _pushToStrip(L61);
-    _pushToStrip(L59);
-    // text
-    _pushToStrip(L32);
-    _pushToStrip(L46);  _pushToStrip(L45);  _pushToStrip(L44);  _pushToStrip(L43);
-    _pushToStrip(L55);  _pushToStrip(L56);  _pushToStrip(L57);
-    
+    STRIP_PRINT(W1_HEART)
+    #if FEATURE_WEATHER()
+    STRIP_PRINT(W2_HEART)
+    #endif
     _displayStrip(_red);
   }
 }
@@ -417,14 +526,14 @@ void EWCDisplay::testAll() {
     if (_testLED > 0) _leds[_testLED - 1] = RgbColor(100, 0, 0);
     if (_testLED > 1) _leds[(_testLED - 2)] = RgbColor(60, 0, 0);
     if (_testLED > 2) _leds[_testLED - 3] = RgbColor(30, 0, 0);
-    if (_testLED < NUM_LEDS) _leds[_testLED + 1] = RgbColor(100, 0, 0);
+    if (_testLED < NUM_LEDS-1) _leds[_testLED + 1] = RgbColor(100, 0, 0);
     _showStrip();
 
     _leds[_testLED] = _black;
     if (_testLED > 0) _leds[_testLED - 1] = _black;
     if (_testLED > 1) _leds[(_testLED - 2)] = _black;
     if (_testLED > 2) _leds[_testLED - 3] = _black;
-    if (_testLED < NUM_LEDS) _leds[_testLED + 1] = _black;
+    if (_testLED < NUM_LEDS-1) _leds[_testLED + 1] = _black;
 
     _testLED++;
     if (_testLED >= NUM_LEDS) {
@@ -444,12 +553,21 @@ void EWCDisplay::fastTest() {
     if (_testHours >= 24) {
       _testHours = 0;
     }
-
+    if (_testTemperature > 30) {
+      _testTemperature = -39;
+      _testWeather++;
+      if (_testWeather > 9) {
+        _testWeather = 0;
+      }    
+    }
     //Array leeren
     _resetAndBlack();
     _timeToStrip(_testHours, _testMinutes);
+    _weatherToStrip(_testTemperature, _testWeather);
     _displayStripRandomColor();
     _testMinutes++;
+    _testTemperature++;
+
   }
 }
 
@@ -471,6 +589,9 @@ void EWCDisplay::clockLogic() {
   if (!_led_bus.IsAnimating()) {
     _resetAndBlack();
     _timeToStrip(hour(), minute());
+    #if FEATURE_WEATHER()
+    _weatherToStrip(28, 1);
+    #endif
     _displayStrip(_default_color);
   }
 }

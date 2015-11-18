@@ -72,9 +72,9 @@ boolean getIR(uint8_t &command) {
 
 void setup() {
 
-#ifdef DEBUG
+  #ifdef DEBUG
   Serial.begin(115200);
-#endif
+  #endif
 
   DEBUG_PRINTLN(F("Starting"));
 

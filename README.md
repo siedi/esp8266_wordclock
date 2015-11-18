@@ -33,3 +33,4 @@ Have fun.
 * Seperate ntp library in external repository (for use in other projects as well)
 * Documentation
 * Use feature switches (e.g. one vs. two clocks, IR, LDR)
+* Fix LDR

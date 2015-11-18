@@ -30,6 +30,10 @@ class EWCDisplay
     static int _stackptr;
     static uint8_t _testHours;
     static uint8_t _testMinutes;
+    #if FEATURE_WEATHER()
+    static int8_t _testTemperature;
+    static uint8_t _testWeather;
+    #endif
     static uint8_t _testLED;
     static uint8_t _language_mode;
     static boolean _auto_brightness_enabled;
@@ -55,6 +59,9 @@ class EWCDisplay
     static void _pushToStrip(int ledId);
     static void _pushToStrip(int leds[], uint8_t size);
     static void _timeToStrip(uint8_t hours, uint8_t minutes);
+    #if FEATURE_WEATHER()
+    static void _weatherToStrip(int8_t temperature, uint8_t weather);
+    #endif
     static void _triggerLedAnim();
     static void _startLedAnim();
 };
