@@ -1,7 +1,5 @@
 #include "EWCWeather.h"
 #include "EWCConfig.h"
-#include "EWCConfigPriv.h"
-//#include "WeatherParser.h"
 
 int8_t EWCWeather::_temperature = 0;
 int8_t EWCWeather::_weather = WEATHER_UNKNOWN;

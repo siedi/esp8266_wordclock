@@ -4,7 +4,6 @@
 #include <ESP8266WiFi.h>
 #include <JsonListener.h>
 #include <JsonStreamingParser.h>
-#include "EWCConfigPriv.h"
 #include "WeatherParser.h"
 
 class EWCWeather
