@@ -19,6 +19,7 @@ Have fun.
   * [Time](https://www.pjrc.com/teensy/td_libs_Time.html), use the latest from the github (again, needed for the Arduino IDE 1.6.6)
   * [NeoPixelBus](https://github.com/Makuna/NeoPixelBus), unfortunately the Fastled-lib is not available for the ESP8266 yet.
   * [IRremoteESP8266](https://github.com/markszabo/IRremoteESP8266), obviously for the IR remote if you want to use one.
+  * [JsonStreamingParser](https://github.com/squix78/json-streaming-parser), parsing the json stream from openweathermap, needs streamer as it is too large to hold completely in memory
 4. Clone the repository and open ewc_source.ino.
 5. Make your changes / settings in ewc_def.h
 6. Compile and upload to your ESP8266 (I'm using the -12 module with the 4MB flash)

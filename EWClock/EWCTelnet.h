@@ -11,6 +11,8 @@ class EWCTelnet
     ~EWCTelnet();
     bool begin();
     void handle();
+    void print(const char* str);
+    void println(const char* str);
     
   private:
 };

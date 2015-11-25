@@ -8,20 +8,22 @@
 #include <NeoPixelBus.h>
 #include <IRremoteESP8266.h>
 #include "WebConfig.h"
-#include "ewc_def.h"
-#include "ewc_telnet.h"
-#include "ewc_ntp.h"
-#include "ewc_display.h"
+#include "EWCConfig.h"
+#include "EWCTelnet.h"
+#include "EWCNtp.h"
+#include "EWCDisplay.h"
+#include "EWCWeather.h"
 
 WebConfig* pWebConfig;
 
 // IR Remote https://github.com/markszabo/IRremoteESP8266
 IRrecv irrecv(IR_RECV_PIN);
 decode_results irDecodeResults;
-Ticker ldr_timer;
+Ticker ldrTimer;
 uint8_t command = NOOP;
 
-void checkLDR() {
+void checkLDR()
+{
   if(Display.getAutoBrightness()) {
     DEBUG_PRINT(F("LDR: "));
     int ldrVal = map(analogRead(LDR_PIN), 0, 1023, 0, 100);
@@ -70,8 +72,8 @@ boolean getIR(uint8_t &command) {
   return false;
 }
 
-void setup() {
-
+void setup()
+{
   #ifdef DEBUG
   Serial.begin(115200);
   #endif
@@ -116,7 +118,8 @@ void setup() {
   // Time Sync and NTP
   if (!NTP.begin()) {
     DEBUG_PRINTLN(F("!!! Error setting up SNTP!"));
-  } else {
+  } 
+  else {
     DEBUG_PRINTLN(F("Starting Time Sync"));
   }
 
@@ -127,7 +130,7 @@ void setup() {
   // Initial Display
   command = DISPLAY_CLOCK;
 
-  ldr_timer.attach(10, checkLDR);
+  //ldrTimer.attach(10, checkLDR);
 
   DEBUG_PRINTLN(F("Setup done"));
   DEBUG_PRINT(F("IP address: "));
@@ -139,7 +142,7 @@ void loop()
   pWebConfig->ProcessHTTP();
   ArduinoOTA.handle();
   Telnet.handle();
-  
+  Weather.checkWeather();
   getIR(command);
 
   switch (command) {

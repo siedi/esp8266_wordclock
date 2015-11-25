@@ -1,16 +1,17 @@
-#include "ewc_def.h"
-#include "ewc_ntp.h"
-//#include <functional>
+#include "EWCConfig.h"
+#include "EWCNtp.h"
 
 extern "C" {
  #include "sntp.h"
 }
 
-EWCNtp::EWCNtp() {
+EWCNtp::EWCNtp()
+{
 
 }
 
-EWCNtp::~EWCNtp() {
+EWCNtp::~EWCNtp()
+{
 
 }
 
@@ -33,12 +34,12 @@ bool EWCNtp::begin()
 time_t EWCNtp::get()
 {
   // needs better failure handling
-  long ntp_timestamp = sntp_get_current_timestamp();
+  long ntpTimestamp = sntp_get_current_timestamp();
 
   DEBUG_PRINT(F("Unix time: "));
-  DEBUG_PRINTLN(ntp_timestamp);
+  DEBUG_PRINTLN(ntpTimestamp);
 
-  return ntp_timestamp;
+  return ntpTimestamp;
 }
 
 void ICACHE_FLASH_ATTR EWCNtp::checkTime()

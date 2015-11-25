@@ -2,22 +2,24 @@
  *  based on https://github.com/esp8266/Arduino/blob/esp8266/hardware/esp8266com/esp8266/libraries/ESP8266WiFi/examples/WiFiTelnetToSerial/WiFiTelnetToSerial.ino
  * 
  */
-#include "ewc_telnet.h"
-#include "ewc_def.h"
-// #include <functional>
+#include "EWCTelnet.h"
+#include "EWCConfig.h"
 
 WiFiServer server(TELNET_PORT);
 WiFiClient serverClients[TELNET_MAX];
 
-EWCTelnet::EWCTelnet() {
+EWCTelnet::EWCTelnet()
+{
 
 }
 
-EWCTelnet::~EWCTelnet(){
+EWCTelnet::~EWCTelnet()
+{
   
 }
 
-bool EWCTelnet::begin() {
+bool EWCTelnet::begin()
+{
   server.begin();
   server.setNoDelay(true);
   // Expects MDNS to be setup already
@@ -25,7 +27,8 @@ bool EWCTelnet::begin() {
   return true;
 }
 
-void EWCTelnet::handle() {
+void EWCTelnet::handle()
+{
   uint8_t i;
   if (server.hasClient()){
     for(i = 0; i < TELNET_MAX; i++){
@@ -64,6 +67,28 @@ void EWCTelnet::handle() {
     }
   }
 
+}
+
+void EWCTelnet::print(const char* str)
+{
+  uint8_t i;
+  for(i = 0; i < TELNET_MAX; i++){
+    if (serverClients[i] && serverClients[i].connected()){
+      size_t len = sizeof(str)/sizeof(*str);
+      serverClients[i].write(str, len);
+    }
+  }
+}
+
+void EWCTelnet::println(const char* str)
+{
+  uint8_t i;
+  for(i = 0; i < TELNET_MAX; i++){
+    if (serverClients[i] && serverClients[i].connected()){
+      size_t len = sizeof(str)/sizeof(*str);
+      serverClients[i].write(str, len);
+    }
+  }
 }
 
 EWCTelnet Telnet = EWCTelnet();

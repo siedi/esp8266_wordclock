@@ -1,8 +1,8 @@
 // most of the stuff in here is based on the idea of and borrowed from https://backes-markus.de/blog/2014/02/diy-rgb-strip-wordclock/
-#include "ewc_display.h"
-#include "ewc_def.h"
+#include "EWCDisplay.h"
+#include "EWCConfig.h"
 
-int EWCDisplay::_led_strip[NUM_LEDS];
+int EWCDisplay::_ledStrip[NUM_LEDS];
 int EWCDisplay::_stackptr = 0;
 uint8_t EWCDisplay::_testHours = 0;
 uint8_t EWCDisplay::_testMinutes = 0;
@@ -11,29 +11,32 @@ int8_t EWCDisplay::_testTemperature = -39;
 uint8_t EWCDisplay::_testWeather = 0;
 #endif
 uint8_t EWCDisplay::_testLED = 0;
-uint8_t EWCDisplay::_language_mode = RHEIN_RUHR_MODE;
-boolean EWCDisplay::_auto_brightness_enabled = false;
-NeoPixelBus EWCDisplay::_led_bus = NeoPixelBus(NUM_LEDS, STRIP_DATA_PIN);
+uint8_t EWCDisplay::_languageMode = RHEIN_RUHR_MODE;
+boolean EWCDisplay::_autoBrightness = false;
+NeoPixelBus EWCDisplay::_ledBus = NeoPixelBus(NUM_LEDS, STRIP_DATA_PIN);
 RgbColor EWCDisplay::_leds[NUM_LEDS];
 RgbColor EWCDisplay::_red = RgbColor(128, 0, 0);
 RgbColor EWCDisplay::_green = RgbColor(0, 128, 0);
 RgbColor EWCDisplay::_blue = RgbColor(0, 0, 128);
 RgbColor EWCDisplay::_white = RgbColor(128);
 RgbColor EWCDisplay::_black = RgbColor(0);
-RgbColor EWCDisplay::_default_color = RgbColor(128);
-Ticker EWCDisplay::_display_anim;
-Ticker EWCDisplay::_led_anim;
+RgbColor EWCDisplay::_defaultColor = RgbColor(128);
+Ticker EWCDisplay::_displayAnim;
+Ticker EWCDisplay::_ledAnim;
 
-EWCDisplay::EWCDisplay() {
+EWCDisplay::EWCDisplay()
+{
 
 }
 
-EWCDisplay::~EWCDisplay(){
+EWCDisplay::~EWCDisplay()
+{
   
 }
 
 // TODO get rid of and replace with fastled function
-RgbColor EWCDisplay::_CHSV(unsigned char h, unsigned char s, unsigned char v) {
+RgbColor EWCDisplay::_CHSV(unsigned char h, unsigned char s, unsigned char v)
+{
   typedef struct rgb
   {
     unsigned char r;
@@ -107,104 +110,125 @@ RgbColor EWCDisplay::_CHSV(unsigned char h, unsigned char s, unsigned char v) {
   return RgbColor(out.r, out.g, out.b);
 }
 
-void EWCDisplay::_resetStrip() {
+void EWCDisplay::_resetStrip()
+{
   _stackptr = 0;
   for (int i = 0; i < NUM_LEDS; i++) {
-    _led_strip[i] = 0;
+    _ledStrip[i] = 0;
   }
 }
 
-void EWCDisplay::_resetAndBlack() {
+void EWCDisplay::_resetAndBlack()
+{
   _resetStrip();
   for (int i = 0; i < NUM_LEDS; i++) {
     _leds[i] = _black;
   }
 }
 
-void EWCDisplay::_showStrip() {
+void EWCDisplay::_showStrip()
+{
   for (int i = 0; i < NUM_LEDS; i++) {
-    _led_bus.SetPixelColor(i, _leds[i]);
+    _ledBus.SetPixelColor(i, _leds[i]);
   }
-  _led_bus.Show();
+  _ledBus.Show();
 }
 
-void EWCDisplay::_displayStrip(RgbColor colorCode) {
+void EWCDisplay::_displayStrip(RgbColor colorCode)
+{
   for (int i = 0; i < _stackptr; i++) {
-    uint8_t j = _led_strip[i];
+    uint8_t j = _ledStrip[i];
     _leds[j] = colorCode;
   }
   _showStrip();
 }
 
-void EWCDisplay::_displayStrip() {
-  _displayStrip(_default_color);
+void EWCDisplay::_displayStrip()
+{
+  _displayStrip(_defaultColor);
 }
 
-void EWCDisplay::_displayStripRandomColor() {
+void EWCDisplay::_displayStripRandomColor()
+{
   for (int i = 0; i < _stackptr; i++) {
-    _leds[_led_strip[i]] = _CHSV(random(0, 255), 255, 255);
+    _leds[_ledStrip[i]] = _CHSV(random(0, 255), 255, 255);
   }
   _showStrip();
 }
 
-void EWCDisplay::_pushToStrip(int ledId) {
-  _led_strip[_stackptr] = ledId;
+void EWCDisplay::_pushToStrip(int ledId)
+{
+  _ledStrip[_stackptr] = ledId;
   _stackptr++;
 }
 
-void EWCDisplay::_pushToStrip(int leds[], uint8_t size) {
+void EWCDisplay::_pushToStrip(int leds[], uint8_t size)
+{
   for(int i = 0; i < size; i++) {
     _pushToStrip(leds[i]);
   }
 }
 
-void EWCDisplay::_timeToStrip(uint8_t hours, uint8_t minutes) {
+void EWCDisplay::_timeToStrip(uint8_t hours, uint8_t minutes)
+{
   STRIP_PRINT(W1_ES_IST)
 
   if (minutes >= 5 && minutes < 10) {
     STRIP_PRINT(W1_FUENF1)
     STRIP_PRINT(W1_NACH)
-  } else if (minutes >= 10 && minutes < 15) {
+  } 
+  else if (minutes >= 10 && minutes < 15) {
     STRIP_PRINT(W1_ZEHN1)
     STRIP_PRINT(W1_NACH)
-  } else if (minutes >= 15 && minutes < 20) {
+  } 
+  else if (minutes >= 15 && minutes < 20) {
     STRIP_PRINT(W1_VIERTEL)
     STRIP_PRINT(W1_NACH)
-  } else if (minutes >= 20 && minutes < 25) {
-    if (_language_mode == RHEIN_RUHR_MODE) {
+  } 
+  else if (minutes >= 20 && minutes < 25) {
+    if (_languageMode == RHEIN_RUHR_MODE) {
       STRIP_PRINT(W1_ZWANZIG)
       STRIP_PRINT(W1_NACH)
-    } else if (_language_mode == WESSI_MODE) {
+    } 
+    else if (_languageMode == WESSI_MODE) {
       STRIP_PRINT(W1_ZEHN1)
       STRIP_PRINT(W1_VOR)
       STRIP_PRINT(W1_HALB)
     }
-  } else if (minutes >= 25 && minutes < 30) {
+  } 
+  else if (minutes >= 25 && minutes < 30) {
     STRIP_PRINT(W1_FUENF1)
     STRIP_PRINT(W1_VOR)
     STRIP_PRINT(W1_HALB)
-  } else if (minutes >= 30 && minutes < 35) {
+  } 
+  else if (minutes >= 30 && minutes < 35) {
     STRIP_PRINT(W1_HALB)
-  } else if (minutes >= 35 && minutes < 40) {
+  } 
+  else if (minutes >= 35 && minutes < 40) {
     STRIP_PRINT(W1_FUENF1)
     STRIP_PRINT(W1_NACH)
     STRIP_PRINT(W1_HALB)
-  } else if (minutes >= 40 && minutes < 45) {
-    if (_language_mode == RHEIN_RUHR_MODE) {
+  } 
+  else if (minutes >= 40 && minutes < 45) {
+    if (_languageMode == RHEIN_RUHR_MODE) {
       STRIP_PRINT(W1_ZWANZIG)
       STRIP_PRINT(W1_VOR)
-    } else if (_language_mode == WESSI_MODE) {
+    } 
+    else if (_languageMode == WESSI_MODE) {
       STRIP_PRINT(W1_ZEHN1)
       STRIP_PRINT(W1_NACH)
       STRIP_PRINT(W1_HALB)
     }
-  } else if (minutes >= 45 && minutes < 50) {
+  } 
+  else if (minutes >= 45 && minutes < 50) {
     STRIP_PRINT(W1_VIERTEL)
     STRIP_PRINT(W1_VOR)
-  } else if (minutes >= 50 && minutes < 55) {
+  } 
+  else if (minutes >= 50 && minutes < 55) {
     STRIP_PRINT(W1_ZEHN1)
     STRIP_PRINT(W1_VOR)
-  } else if (minutes >= 55 && minutes < 60) {
+  } 
+  else if (minutes >= 55 && minutes < 60) {
     STRIP_PRINT(W1_FUENF1)
     STRIP_PRINT(W1_VOR)
   }
@@ -235,11 +259,12 @@ void EWCDisplay::_timeToStrip(uint8_t hours, uint8_t minutes) {
     hours -= 12;
   }
 
-  if (_language_mode == RHEIN_RUHR_MODE) {
+  if (_languageMode == RHEIN_RUHR_MODE) {
     if (minutes >= 25) {
       hours++;
     }
-  } else if (_language_mode == WESSI_MODE) {
+  } 
+  else if (_languageMode == WESSI_MODE) {
     if (minutes >= 20) {
       hours++;
     }
@@ -300,7 +325,8 @@ void EWCDisplay::_timeToStrip(uint8_t hours, uint8_t minutes) {
 }
 
 #if FEATURE_WEATHER()
-void EWCDisplay::_weatherToStrip(int8_t temperature, uint8_t weather) {
+void EWCDisplay::_weatherToStrip(int8_t temperature, int8_t weather)
+{
   STRIP_PRINT(W2_HEUTE)
   STRIP_PRINT(W2_WIRD)
   STRIP_PRINT(W2_ES)
@@ -415,76 +441,84 @@ void EWCDisplay::_weatherToStrip(int8_t temperature, uint8_t weather) {
 }
 #endif
 
-void EWCDisplay::_triggerLedAnim() {
-  if (_led_bus.IsAnimating())
-  {
-    _led_bus.UpdateAnimations();
-    _led_bus.Show();
-  } else {
-    _led_anim.detach();
+void EWCDisplay::_triggerLedAnim()
+{
+  if (_ledBus.IsAnimating()) {
+    _ledBus.UpdateAnimations();
+    _ledBus.Show();
+  }
+  else {
+    _ledAnim.detach();
   }
 }
 
-void EWCDisplay::_startLedAnim() {
-  _led_bus.StartAnimating();
-  _led_anim.attach_ms(30, _triggerLedAnim);
+void EWCDisplay::_startLedAnim()
+{
+  _ledBus.StartAnimating();
+  _ledAnim.attach_ms(30, _triggerLedAnim);
 }
 
-bool EWCDisplay::begin() {
+bool EWCDisplay::begin()
+{
   
   for (int i = 0; i < NUM_LEDS; i++) {
-    _led_strip[i] = 0;
+    _ledStrip[i] = 0;
   }
-  _led_bus.Begin();
+  _ledBus.Begin();
   _resetAndBlack();
   _displayStrip();
   
   return true;
 }
 
-void EWCDisplay::setAutoBrightness(boolean enabled) {
-  _auto_brightness_enabled = enabled;
+void EWCDisplay::setAutoBrightness(boolean enabled)
+{
+  _autoBrightness = enabled;
 }
 
 boolean EWCDisplay::getAutoBrightness() {
-  return _auto_brightness_enabled;
+  return _autoBrightness;
 }
 
-void EWCDisplay::changeBrightness(int8_t amount) {
+void EWCDisplay::changeBrightness(int8_t amount)
+{
   RgbColor prevColor;
   uint8_t speed = 100;
   
-  _auto_brightness_enabled = false;
-  _display_anim.detach();
+  _autoBrightness = false;
+  _displayAnim.detach();
   for (int i = 0; i < NUM_LEDS; i++) {
-    prevColor = _led_bus.GetPixelColor(i);
+    prevColor = _ledBus.GetPixelColor(i);
     if (amount > 0) {
       prevColor.Lighten(prevColor.CalculateBrightness() / amount);
-    } else {
+    }
+    else {
       prevColor.Darken(prevColor.CalculateBrightness() / abs(amount));
     }
-    _led_bus.LinearFadePixelColor(speed, i, prevColor);
+    _ledBus.LinearFadePixelColor(speed, i, prevColor);
   }
   _startLedAnim();
 }
 
-void EWCDisplay::setBrightness(uint8_t value) {
+void EWCDisplay::setBrightness(uint8_t value)
+{
   RgbColor prevColor;
   uint8_t speed = 100;
   int8_t amount;
 
-  if(value != _old_brightness) {
-    amount = value - _old_brightness;
-    _old_brightness = value;
-    _display_anim.detach();
+  if(value != _oldBrightness) {
+    amount = value - _oldBrightness;
+    _oldBrightness = value;
+    _displayAnim.detach();
     for (int i = 0; i < NUM_LEDS; i++) {
-      prevColor = _led_bus.GetPixelColor(i);
+      prevColor = _ledBus.GetPixelColor(i);
       if (amount > 0) {
         prevColor.Lighten(prevColor.CalculateBrightness() / amount);
-      } else {
+      } 
+      else {
         prevColor.Darken(prevColor.CalculateBrightness() / abs(amount));
       }
-      _led_bus.LinearFadePixelColor(speed, i, prevColor);
+      _ledBus.LinearFadePixelColor(speed, i, prevColor);
     }
     _startLedAnim();
     
@@ -492,22 +526,24 @@ void EWCDisplay::setBrightness(uint8_t value) {
 
 }
 
-void EWCDisplay::off() {
+void EWCDisplay::off()
+{
   DEBUG_PRINTLN(F("switching off"));
-  _display_anim.detach();
-  if (!_led_bus.IsAnimating()) {
+  _displayAnim.detach();
+  if (!_ledBus.IsAnimating()) {
     _resetAndBlack();
     for (int i = 0; i < NUM_LEDS; i++) {
-      _led_bus.LinearFadePixelColor(1000, i, _black);
+      _ledBus.LinearFadePixelColor(1000, i, _black);
     }
     _startLedAnim();
   }
 }
 
-void EWCDisplay::showHeart() {
+void EWCDisplay::showHeart()
+{
   DEBUG_PRINT(F("HEART..."));
-  if (!_led_bus.IsAnimating()) {
-    _auto_brightness_enabled = false;
+  if (!_ledBus.IsAnimating()) {
+    _autoBrightness = false;
     _resetAndBlack();
     STRIP_PRINT(W1_HEART)
     #if FEATURE_WEATHER()
@@ -517,10 +553,11 @@ void EWCDisplay::showHeart() {
   }
 }
 
-void EWCDisplay::testAll() {
+void EWCDisplay::testAll()
+{
   DEBUG_PRINT(F("SNAKE..."));
-  if (!_led_bus.IsAnimating()) {
-    _auto_brightness_enabled = false;
+  if (!_ledBus.IsAnimating()) {
+    _autoBrightness = false;
     _resetAndBlack();
     _leds[_testLED] = _red;
     if (_testLED > 0) _leds[_testLED - 1] = RgbColor(100, 0, 0);
@@ -542,10 +579,11 @@ void EWCDisplay::testAll() {
   }
 }
 
-void EWCDisplay::fastTest() {
+void EWCDisplay::fastTest()
+{
   DEBUG_PRINTLN(F("FAST TEST..."));
-  if (!_led_bus.IsAnimating()) {
-    _auto_brightness_enabled = false;
+  if (!_ledBus.IsAnimating()) {
+    _autoBrightness = false;
     if (_testMinutes >= 60) {
       _testMinutes = 0;
       _testHours++;
@@ -571,10 +609,11 @@ void EWCDisplay::fastTest() {
   }
 }
 
-void EWCDisplay::makeParty() {
+void EWCDisplay::makeParty()
+{
   DEBUG_PRINTLN(F("PARTY YEAH..."));
-  if (!_led_bus.IsAnimating()) {
-    _auto_brightness_enabled = false;
+  if (!_ledBus.IsAnimating()) {
+    _autoBrightness = false;
     _resetAndBlack();
     for (int i = 0; i < NUM_LEDS; i++) {
       //leds[i] = CHSV(random(0, 255), 255, 255);
@@ -584,21 +623,23 @@ void EWCDisplay::makeParty() {
   }
 }
 
-void EWCDisplay::clockLogic() {
+void EWCDisplay::clockLogic()
+{
   DEBUG_PRINTLN(F("Clock..."));
-  if (!_led_bus.IsAnimating()) {
+  if (!_ledBus.IsAnimating()) {
     _resetAndBlack();
     _timeToStrip(hour(), minute());
     #if FEATURE_WEATHER()
-    _weatherToStrip(28, 1);
+    _weatherToStrip(Weather.getTemperature(), Weather.getWeather());
     #endif
-    _displayStrip(_default_color);
+    _displayStrip(_defaultColor);
   }
 }
 
-void EWCDisplay::setDisplay(FunctPtr fp, float seconds) {
+void EWCDisplay::setDisplay(FunctPtr fp, float seconds)
+{
   (fp)();
-  _display_anim.attach(seconds, fp);
+  _displayAnim.attach(seconds, fp);
 }
 
 EWCDisplay Display = EWCDisplay();
