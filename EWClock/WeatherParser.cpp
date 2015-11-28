@@ -40,7 +40,7 @@ void WeatherListener::value(String value) {
     _temperature((int8_t)ROUND_INT(value.toFloat()));
     _temperatureDone = true;
   }
-  else if (_lastKey = "icon" && !_weatherDone) {
+  else if (_lastKey == "icon" && !_weatherDone) {
     DEBUG_PRINTLN("-icon: " + value);
     _weatherDone = true;
     if (value == "01d") {
