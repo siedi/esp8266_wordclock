@@ -474,3 +474,4 @@ char *WebConfig::getConfigValue()
 {
   return ntpServer;
 }
+

@@ -1,16 +1,15 @@
 #include <EEPROM.h>
 #include <ESP8266WiFi.h>
+#include <time.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include <Ticker.h>
-#include <TimeLib.h>
 #include <NeoPixelBus.h>
 #include <IRremoteESP8266.h>
 #include "WebConfig.h"
 #include "EWCConfig.h"
 #include "EWCTelnet.h"
-#include "EWCNtp.h"
 #include "EWCDisplay.h"
 #include "EWCWeather.h"
 
@@ -74,9 +73,9 @@ boolean getIR(uint8_t &command) {
 
 void setup()
 {
-  #ifdef DEBUG
+#ifdef DEBUG
   Serial.begin(115200);
-  #endif
+#endif
 
   DEBUG_PRINTLN(F("Starting"));
 
@@ -85,7 +84,7 @@ void setup()
 
   // Network setup - using a library from the esp8266.com forum for now
   DEBUG_PRINTLN(F("Setting Up Network"));
-  pWebConfig = new WebConfig("BASIC WEBCONFIG v1.0", "WORDCLOCK", "123456789 ", false);
+  pWebConfig = new WebConfig("BASIC WEBCONFIG v1.0", "wordclock", "12345678901234567890 ", false);
 
   // OTA setup provided by esp8266.com
   ArduinoOTA.onStart([]() {
@@ -115,14 +114,13 @@ void setup()
   // Telnet server - no functionality yet
   Telnet.begin();
 
-  // Time Sync and NTP
-  if (!NTP.begin()) {
-    DEBUG_PRINTLN(F("!!! Error setting up SNTP!"));
-  } 
-  else {
-    DEBUG_PRINTLN(F("Starting Time Sync"));
-  }
-
+  configTime(NTP_TIMEZONE * 3600, 0, const_cast<char *>(NTP_SERVER));
+  //configTime(1 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+  /*while (!time(nullptr)) {
+    Serial.print(".");
+    delay(1000);
+  }*/
+  
   // IR setup
   DEBUG_PRINTLN(F("Enabling IR Remote"));
   irrecv.enableIRIn();
@@ -130,7 +128,7 @@ void setup()
   // Initial Display
   command = DISPLAY_CLOCK;
 
-  //ldrTimer.attach(10, checkLDR);
+  ldrTimer.attach(10, checkLDR);
 
   DEBUG_PRINTLN(F("Setup done"));
   DEBUG_PRINT(F("IP address: "));
@@ -193,3 +191,4 @@ void loop()
   command = NOOP;
   yield();
 }
+

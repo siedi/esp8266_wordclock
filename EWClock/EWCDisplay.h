@@ -1,8 +1,8 @@
 #ifndef EWC_DISPLAY_H
 #define EWC_DISPLAY_H
 
+#include <time.h>
 #include <NeoPixelBus.h>
-#include <TimeLib.h>
 #include <Ticker.h>
 #include "EWCConfig.h"
 #include "EWCWeather.h"
@@ -70,3 +70,4 @@ class EWCDisplay
 extern EWCDisplay Display;
 
 #endif
+

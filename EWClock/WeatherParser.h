@@ -27,3 +27,4 @@ class WeatherListener: public JsonListener {
 
     virtual void startObject();
 };
+

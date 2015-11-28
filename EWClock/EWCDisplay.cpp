@@ -1,6 +1,5 @@
 // most of the stuff in here is based on the idea of and borrowed from https://backes-markus.de/blog/2014/02/diy-rgb-strip-wordclock/
 #include "EWCDisplay.h"
-#include "EWCConfig.h"
 
 int EWCDisplay::_ledStrip[NUM_LEDS];
 int EWCDisplay::_stackptr = 0;
@@ -628,7 +627,8 @@ void EWCDisplay::clockLogic()
   DEBUG_PRINTLN(F("Clock..."));
   if (!_ledBus.IsAnimating()) {
     _resetAndBlack();
-    _timeToStrip(hour(), minute());
+    time_t now = time(nullptr);
+    _timeToStrip(localtime(&now)->tm_hour, localtime(&now)->tm_min);
     #if FEATURE_WEATHER()
     _weatherToStrip(Weather.getTemperature(), Weather.getWeather());
     #endif

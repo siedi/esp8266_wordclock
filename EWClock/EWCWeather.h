@@ -38,3 +38,4 @@ class EWCWeather
 extern EWCWeather Weather;
 
 #endif
+
