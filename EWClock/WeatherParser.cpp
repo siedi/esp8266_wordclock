@@ -36,7 +36,7 @@ void WeatherListener::key(String key) {
 
 void WeatherListener::value(String value) {
   if (_lastKey == "day" && !_temperatureDone) {
-    //DEBUG_PRINTLN("-temp: " + value);
+    DEBUG_PRINTLN("-temp: " + value);
     _temperature((int8_t)ROUND_INT(value.toFloat()));
     _temperatureDone = true;
   }

@@ -156,27 +156,27 @@ void loop()
     case DISPLAY_CLOCK:
       DEBUG_PRINTLN("COMMAND: DISPLAY_CLOCK");
       Display.setAutoBrightness(true);
-      Display.setDisplay(Display.clockLogic, 10);
+      Display.setDisplay(Display.clockLogic);
       break;
     case DISPLAY_FASTTEST:
       DEBUG_PRINTLN(F("COMMAND: FAST TEST"));
-      Display.setDisplay(Display.fastTest, 1);
+      Display.setDisplay(Display.fastTest);
       break;
     case DISPLAY_PROG1:
       DEBUG_PRINTLN(F("COMMAND: makeParty (PROG1)"));
-      Display.setDisplay(Display.makeParty, 0.5);
+      Display.setDisplay(Display.makeParty);
       break;
     case DISPLAY_PROG2:
       DEBUG_PRINTLN(F("COMMAND: showHeart (PROG2)"));
-      Display.setDisplay(Display.showHeart, 0.5);
+      Display.setDisplay(Display.showHeart);
       break;
     case DISPLAY_PROG3:
       DEBUG_PRINTLN(F("COMMAND: fastTest (PROG3)"));
-      Display.setDisplay(Display.fastTest, 1);
+      Display.setDisplay(Display.fastTest);
       break;
     case DISPLAY_PROG4:
       DEBUG_PRINTLN(F("COMMAND: testAll (PROG4)"));
-      Display.setDisplay(Display.testAll, 0.08);
+      Display.setDisplay(Display.testAll);
       break;
     case NOOP:
       break;

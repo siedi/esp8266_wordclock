@@ -22,6 +22,8 @@ RgbColor EWCDisplay::_black = RgbColor(0);
 RgbColor EWCDisplay::_defaultColor = RgbColor(128);
 Ticker EWCDisplay::_displayAnim;
 Ticker EWCDisplay::_ledAnim;
+typedef void (*FunctPtr)();
+FunctPtr EWCDisplay::_currentDisplay;
 
 EWCDisplay::EWCDisplay()
 {
@@ -448,6 +450,9 @@ void EWCDisplay::_triggerLedAnim()
   }
   else {
     _ledAnim.detach();
+    if (_currentDisplay) {
+      Display.setDisplay(_currentDisplay);
+    }
   }
 }
 
@@ -520,9 +525,7 @@ void EWCDisplay::setBrightness(uint8_t value)
       _ledBus.LinearFadePixelColor(speed, i, prevColor);
     }
     _startLedAnim();
-    
   }
-
 }
 
 void EWCDisplay::off()
@@ -636,10 +639,27 @@ void EWCDisplay::clockLogic()
   }
 }
 
-void EWCDisplay::setDisplay(FunctPtr fp, float seconds)
+void EWCDisplay::setDisplay(FunctPtr fp)
 {
-  (fp)();
-  _displayAnim.attach(seconds, fp);
+  float seconds = 1;
+  _currentDisplay = fp;
+  if (_currentDisplay == clockLogic) {
+    seconds = 10;
+  }
+  else if (_currentDisplay == fastTest) {
+    seconds = 10;
+  }
+  else if (_currentDisplay == makeParty) {
+    seconds = 0.5;
+  }   
+  else if (_currentDisplay == showHeart) {
+    seconds = 1;
+  }
+  else if (_currentDisplay == testAll) {
+    seconds = 0.1;
+  }
+  (_currentDisplay)();
+  _displayAnim.attach(seconds, _currentDisplay);
 }
 
 EWCDisplay Display = EWCDisplay();

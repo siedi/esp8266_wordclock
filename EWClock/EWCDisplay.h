@@ -27,7 +27,7 @@ class EWCDisplay
     static void makeParty();
     static void clockLogic(); 
     typedef void (*FunctPtr)();
-    void setDisplay(FunctPtr fp, float seconds);
+    void setDisplay(FunctPtr fp);
 
   private:
     static int _ledStrip[NUM_LEDS];
@@ -51,6 +51,7 @@ class EWCDisplay
     static RgbColor _defaultColor;
     static Ticker _displayAnim;
     static Ticker _ledAnim;
+    static FunctPtr _currentDisplay;
     uint8_t _oldBrightness = 100;
 
     static RgbColor _CHSV(unsigned char h, unsigned char s, unsigned char v);
