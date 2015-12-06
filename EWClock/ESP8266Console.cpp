@@ -2,41 +2,39 @@
  *  based on https://github.com/esp8266/Arduino/blob/esp8266/hardware/esp8266com/esp8266/libraries/ESP8266WiFi/examples/WiFiTelnetToSerial/WiFiTelnetToSerial.ino
  * 
  */
-#include "EWCTelnet.h"
-#include "EWCConfig.h"
+
+#include "ESP8266Console.h"
 
 WiFiServer server(TELNET_PORT);
 WiFiClient serverClients[TELNET_MAX];
 
-EWCTelnet::EWCTelnet()
+ESP8266Console::ESP8266Console()
 {
 
 }
 
-EWCTelnet::~EWCTelnet()
+ESP8266Console::~ESP8266Console()
 {
   
 }
 
-bool EWCTelnet::begin()
+void ESP8266Console::begin()
 {
   server.begin();
   server.setNoDelay(true);
-  // Expects MDNS to be setup already
-  // MDNS.addService("arduino", "tcp", TELNET_PORT);
-  return true;
 }
 
-void EWCTelnet::handle()
+void ESP8266Console::handle()
 {
   uint8_t i;
+  
+  // check for new clients
   if (server.hasClient()){
     for(i = 0; i < TELNET_MAX; i++){
       //find free/disconnected spot
       if (!serverClients[i] || !serverClients[i].connected()){
         if(serverClients[i]) serverClients[i].stop();
         serverClients[i] = server.available();
-        Serial.print("New client: "); Serial.print(i);
         continue;
       }
     }
@@ -44,6 +42,7 @@ void EWCTelnet::handle()
     WiFiClient serverClient = server.available();
     serverClient.stop();
   }
+  
   //check clients for data
   for(i = 0; i < TELNET_MAX; i++){
     if (serverClients[i] && serverClients[i].connected()){
@@ -53,6 +52,7 @@ void EWCTelnet::handle()
       }
     }
   }
+
   //check UART for data
   if(Serial.available()){
     size_t len = Serial.available();
@@ -69,27 +69,40 @@ void EWCTelnet::handle()
 
 }
 
-void EWCTelnet::print(const char* str)
+size_t ESP8266Console::write(uint8_t c)
 {
-  uint8_t i;
-  for(i = 0; i < TELNET_MAX; i++){
-    if (serverClients[i] && serverClients[i].connected()){
-      size_t len = sizeof(str)/sizeof(*str);
-      serverClients[i].write(str, len);
-    }
-  }
+  return write(&c, 1);
 }
 
-void EWCTelnet::println(const char* str)
+size_t ESP8266Console::write(const uint8_t *buf, size_t len)
 {
+  Serial.write(buf, len);
   uint8_t i;
-  for(i = 0; i < TELNET_MAX; i++){
+  for(i = 0; i < TELNET_MAX; i++) {
     if (serverClients[i] && serverClients[i].connected()){
-      size_t len = sizeof(str)/sizeof(*str);
-      serverClients[i].write(str, len);
+      serverClients[i].write(buf, len);
     }
   }
+  return len;
 }
 
-EWCTelnet Telnet = EWCTelnet();
+int ESP8266Console::available(void) {
+  // not implemented yet, we handle the input
+  return 0;
+}
 
+int ESP8266Console::read(void){
+  // not implemented yet, we don't receive any input yet
+  return -1;
+}
+
+int ESP8266Console::peek(void){
+  // not implemented yet, we don't receive any input yet
+  return -1;
+}
+
+void ESP8266Console::flush(void){
+  // not implemented yet, we don't receive any input yet
+}
+
+ESP8266Console Console = ESP8266Console();

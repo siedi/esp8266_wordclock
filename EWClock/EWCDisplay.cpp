@@ -583,6 +583,7 @@ void EWCDisplay::fastTest()
   DEBUG_PRINTLN(F("FAST TEST..."));
   if (!_ledBus.IsAnimating()) {
     _autoBrightness = false;
+    _resetAndBlack();
     if (_testMinutes >= 60) {
       _testMinutes = 0;
       _testHours++;
@@ -590,6 +591,9 @@ void EWCDisplay::fastTest()
     if (_testHours >= 24) {
       _testHours = 0;
     }
+    _timeToStrip(_testHours, _testMinutes);
+    _testMinutes++;
+    #if FEATURE_WEATHER()
     if (_testTemperature > 30) {
       _testTemperature = -39;
       _testWeather++;
@@ -597,14 +601,10 @@ void EWCDisplay::fastTest()
         _testWeather = 0;
       }    
     }
-    //Array leeren
-    _resetAndBlack();
-    _timeToStrip(_testHours, _testMinutes);
     _weatherToStrip(_testTemperature, _testWeather);
-    _displayStripRandomColor();
-    _testMinutes++;
     _testTemperature++;
-
+    #endif
+    _displayStripRandomColor();
   }
 }
 

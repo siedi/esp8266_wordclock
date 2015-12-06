@@ -9,9 +9,11 @@
 #include <IRremoteESP8266.h>
 #include "WebConfig.h"
 #include "EWCConfig.h"
-#include "EWCTelnet.h"
+#include "ESP8266Console.h"
 #include "EWCDisplay.h"
+#if FEATURE_WEATHER()
 #include "EWCWeather.h"
+#endif
 
 WebConfig* pWebConfig;
 
@@ -27,7 +29,7 @@ void checkLDR()
     DEBUG_PRINT(F("LDR: "));
     int ldrVal = map(analogRead(LDR_PIN), 0, 1023, 0, 100);
     DEBUG_PRINTLN(ldrVal);
-    Display.setBrightness(ldrVal);
+    // Display.setBrightness(ldrVal);
   }
 }
 
@@ -87,39 +89,34 @@ void setup()
   pWebConfig = new WebConfig("BASIC WEBCONFIG v1.0", "wordclock", "12345678901234567890 ", false);
 
   // OTA setup provided by esp8266.com
+  ArduinoOTA.setHostname("wordclock");
+
   ArduinoOTA.onStart([]() {
-    Serial.println("Start");
+    Console.println("Start");
   });
   ArduinoOTA.onEnd([]() {
-    Serial.println("End");
+    Console.println("\nEnd");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\n", (progress / (total / 100)));
+    Console.printf("Progress: %u%%\r", (progress / (total / 100)));
   });
   ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECIEVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    Console.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Console.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Console.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Console.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Console.println("Receive Failed");
+    else if (error == OTA_END_ERROR) Console.println("End Failed");
   });
-  ArduinoOTA.setHostname("wordclock");
   ArduinoOTA.begin();
-  
+
   // mDNS - go to http://wordclock.local for the network setup
   // with ArduinoOTA we get an MDNSResponder already, so we can skip the MDNS.begin
   MDNS.addService("http", "tcp", 80);
 
-  // Telnet server - no functionality yet
-  Telnet.begin();
-
+  Console.begin();
+  
   configTime(NTP_TIMEZONE * 3600, 0, const_cast<char *>(NTP_SERVER));
-  //configTime(1 * 3600, 0, "pool.ntp.org", "time.nist.gov");
-  /*while (!time(nullptr)) {
-    Serial.print(".");
-    delay(1000);
-  }*/
   
   // IR setup
   DEBUG_PRINTLN(F("Enabling IR Remote"));
@@ -138,8 +135,8 @@ void setup()
 void loop()
 {
   pWebConfig->ProcessHTTP();
+  Console.handle();
   ArduinoOTA.handle();
-  Telnet.handle();
   Weather.checkWeather();
   getIR(command);
 
@@ -157,7 +154,7 @@ void loop()
       Display.changeBrightness(-2);
       break;
     case DISPLAY_CLOCK:
-      DEBUG_PRINTLN(F("COMMAND: DISPLAY_CLOCK"));
+      DEBUG_PRINTLN("COMMAND: DISPLAY_CLOCK");
       Display.setAutoBrightness(true);
       Display.setDisplay(Display.clockLogic, 10);
       break;

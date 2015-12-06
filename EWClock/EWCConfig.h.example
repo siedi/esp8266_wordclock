@@ -1,9 +1,8 @@
 #ifndef EWC_DEF_H
 #define EWC_DEF_H
 
-#include "Arduino.h"
 #include "EWCLayout.h"
-#include "EWCConfigPriv.h"
+#include "ESP8266Console.h"
 
 // Enable DEBUG messages
 #define DEBUG
@@ -21,8 +20,8 @@
 #define NTP_SERVER "time.nist.gov"
 
 // OPENWEATHER
-#define OPENWEATHER_APPID "a1b2c3" // replace with your api key from openweathermap
-#define OPENWEATHER_CITYID "1234" // replace with your city-id from openweathermap
+#define OPENWEATHER_APPID "a1b2c3"
+#define OPENWEATHER_CITYID "1234"
 #define OPENWEATHER_HOST "api.openweathermap.org"
 #define OPENWEATHER_URL "/data/2.5/forecast/daily?id=" + OPENWEATHER_CITYID + "&units=metric&appid=" + OPENWEATHER_APPID
 #define OPENWEATHER_PORT 80
@@ -63,8 +62,8 @@
 #define WESSI_MODE 1
 
 #ifdef DEBUG
-  #define DEBUG_PRINT(str)  Serial.print (str)
-  #define DEBUG_PRINTLN(str)  Serial.println (str)
+  #define DEBUG_PRINT(str)  Console.print (str);
+  #define DEBUG_PRINTLN(str)  Console.println (str);
 #else
   #define DEBUG_PRINT(str)
   #define DEBUG_PRINTLN(str)

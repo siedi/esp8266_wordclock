@@ -5,7 +5,10 @@
 #include <NeoPixelBus.h>
 #include <Ticker.h>
 #include "EWCConfig.h"
+#if FEATURE_WEATHER()
 #include "EWCWeather.h"
+#endif
+#include "ESP8266Console.h"
 
 class EWCDisplay
 {
@@ -70,4 +73,3 @@ class EWCDisplay
 extern EWCDisplay Display;
 
 #endif
-

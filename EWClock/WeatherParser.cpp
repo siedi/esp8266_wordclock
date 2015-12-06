@@ -36,38 +36,38 @@ void WeatherListener::key(String key) {
 
 void WeatherListener::value(String value) {
   if (_lastKey == "day" && !_temperatureDone) {
-    DEBUG_PRINTLN("-temp: " + value);
+    //DEBUG_PRINTLN("-temp: " + value);
     _temperature((int8_t)ROUND_INT(value.toFloat()));
     _temperatureDone = true;
   }
   else if (_lastKey == "icon" && !_weatherDone) {
-    DEBUG_PRINTLN("-icon: " + value);
+    //DEBUG_PRINTLN("-icon: " + value);
     _weatherDone = true;
-    if (value == "01d") {
+    if (value == "01d" || value == "01n" ) {
       _weather((int8_t)WEATHER_SONNE);
     }
-    else if (value == "02d") {
+    else if (value == "02d" || value == "02n") {
       _weather((int8_t)WEATHER_SONNEMITWOLKEN);
     }
-    else if (value == "03d") {
+    else if (value == "03d" || value == "03n") {
       _weather((int8_t)WEATHER_WOLKEN);
     }
-    else if (value == "04d") {
+    else if (value == "04d" || value == "04n") {
       _weather((int8_t)WEATHER_WOLKEN);
     }
-    else if (value == "09d") {
+    else if (value == "09d" || value == "09n") {
       _weather((int8_t)WEATHER_REGEN);
     }
-    else if (value == "10d") {
+    else if (value == "10d" || value == "10n") {
       _weather((int8_t)WEATHER_REGEN);
     }
-    else if (value == "11d") {
+    else if (value == "11d" || value == "11n") {
       _weather((int8_t)WEATHER_STURM);
     }
-    else if (value == "13d") {
+    else if (value == "13d" || value == "13n") {
       _weather((int8_t)WEATHER_SCHNEE);
     }
-    else if (value == "50d") {
+    else if (value == "50d" || value == "50n") {
       _weather((int8_t)WEATHER_NEBEL);
     }
   }
@@ -92,4 +92,3 @@ void WeatherListener::startArray() {
 void WeatherListener::startObject() {
 //  Serial.println("start object. ");
 }
-

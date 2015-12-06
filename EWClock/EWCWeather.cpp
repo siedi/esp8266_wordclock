@@ -25,19 +25,14 @@ int8_t EWCWeather::getTemperature() {
 
 void EWCWeather::requestWeather()
 {
-  //const char * path = "/data/2.5/forecast/daily?id=2933799&units=metric&appid=c1c4b462172201936ed0b89097f505e7";
-  //const char * host = "api.openweathermap.org";
-  //const int httpPort = 80;
-
-  // clear an existing connection first
+  // clear any existing connection first
   if (weatherClient.connected()) {
-    Serial.println("flushing old connection");
     weatherClient.flush();
     weatherClient.stop();
   }
   
   if (!weatherClient.connect(OPENWEATHER_HOST, OPENWEATHER_PORT)) {
-    Serial.println("connection failed");
+    DEBUG_PRINTLN("Weather connection failed");
     return;
   }
 
@@ -49,30 +44,21 @@ void EWCWeather::requestWeather()
 
 void EWCWeather::checkWeather()
 {
-
   // check if we need a new connection and sync time expired, then start request
   // we only have to check for the syn-periode as the client still might be connected, but we dont care.
   if (millis() > nextSyncTime) {
-    Serial.print("Start new sync ");
-    Serial.println(millis());
+    DEBUG_PRINTLN("Weather start new sync");
     requestWeather();
     nextSyncTime = millis() + weatherSyncInterval * 1000;
-    Serial.print("New Sync time: ");
-    Serial.println(nextSyncTime);
     listener.weather(EWCWeather::setWeather);
     listener.temperature(EWCWeather::setTemperature);
     parser.setListener(&listener);
     section="header";
-    Serial.println(String(ESP.getFreeHeap()));
   }
 
   char recieved;
   while (weatherClient.available()){
-    //Serial.print(section);
-    //Serial.print("-");
-
     recieved = weatherClient.read();
-    
     
     if (section == "header") {
       if (recieved == '\n') {
@@ -92,7 +78,6 @@ void EWCWeather::checkWeather()
     else if (section == "bodynewline") {
       if (recieved == '{') {
         section = "jsonstart";
-        //Serial.print(recieved);
         parser.parse(recieved);
       }
       else if (recieved == '\n') {
@@ -111,8 +96,6 @@ void EWCWeather::checkWeather()
       if (recieved == '\n') {
         section = "ignore"; // we just read one line form the body
       } else {
-        // do the json part
-        Serial.print(recieved);
         parser.parse(recieved);
       }
     }
@@ -120,19 +103,14 @@ void EWCWeather::checkWeather()
   }
 
   if (section == "ignore") {
-    // if we are done, we close the connection
-    Serial.println("connection no longer needed");
     weatherClient.flush();
     weatherClient.stop();
     section = "done";
-    Serial.print("Weather: ");
-    Serial.println(_weather);
-    Serial.print("Temp: ");
-    Serial.println(_temperature);
+    DEBUG_PRINT("Weather: ");
+    DEBUG_PRINTLN(_weather);
+    DEBUG_PRINT("Temp: ");
+    DEBUG_PRINTLN(_temperature);
   }
-
 }
 
-
 EWCWeather Weather = EWCWeather();
-
