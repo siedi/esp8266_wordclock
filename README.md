@@ -6,6 +6,10 @@ This is a port of the famous wordclock based on the implementation of [Markus Ba
 * a nice image, printed behind acryl glass with the letters blanked out (ask a professional print office, costs around EUR 300 in that size) and
 * consists of two wordclocks, the left is as you know it, the right is to show the temperature.
 
+![Wordclock](http://41.media.tumblr.com/c932fcc5221e190e852210302d3322b1/tumblr_nyxwy0TpTF1v135fno7_540.jpg)
+
+[More pictures on Tumblr](http://esp8266wordclock.tumblr.com/)
+
 The design folder includes the SVG (use Inkscape to open it) with the layout of the front panel as well as the light grid and backplane constructed out of wood.
 
 The EWCClock folder contains the source code to build with the Arduino IDE (using the [esp8267.com](https://github.com/esp8266/Arduino) extension).
@@ -25,9 +29,8 @@ Have fun.
 
 ## TODO
 * Fixes:
-  * Refactor code (I'm not a C/C++ developer, if someone can help, please PM me)
-  * Logic (ticker) stops running after brightness change
-  * Fix LDR logic
+  * Refactor code, especially display logic (I'm not a C/C++ developer, if someone can help, please PM me)
+  * Fix LDR logic / brightness settings
 * Features:
   * Several presets for the default color
   * Replace existing webserver with a good interface and include more setting options
