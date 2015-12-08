@@ -20,22 +20,26 @@ Have fun.
 1. Download and install the latest Arduino IDE (currently 1.6.6)
 2. Download and install the latest [esp8266.com](https://github.com/esp8266/Arduino) source code from their git repository (needed to run with Arduino IDE 1.6.6)
 3. Download and Install the following libraries
-  * [NeoPixelBus](https://github.com/Makuna/NeoPixelBus), unfortunately the Fastled-lib is not available for the ESP8266 yet.
+  * [NeoPixelBus](https://github.com/Makuna/NeoPixelBus), unfortunately the Fastled lib is not available for the ESP8266 yet.
   * [IRremoteESP8266](https://github.com/markszabo/IRremoteESP8266), obviously for the IR remote if you want to use one.
   * [JsonStreamingParser](https://github.com/squix78/json-streaming-parser), parsing the json stream from openweathermap, needs streamer as it is too large to hold completely in memory
 4. Clone the repository
-5. Rename Make EWCConfig.h.example to EWCConfig.h and make your changes
-6. Compile and upload to your ESP8266 (I'm using the -12 module with the 4MB flash)
+5. Rename EWCConfig.h.example to EWCConfig.h and make your changes
+6. Compile and upload to your ESP8266 (I'm using the -12 module with 4MB flash)
 
 ## TODO
 * Fixes:
   * Refactor code, especially display logic (I'm not a C/C++ developer, if someone can help, please PM me)
+  * Refactor code
+  * Refactor code
   * Fix LDR logic / brightness settings
+  * did I say to refactor the code?
 * Features:
-  * Several presets for the default color
   * Replace existing webserver with a good interface and include more setting options
-  * Implement the snake game (use IR as the controller)
+  * Replace openweathermap, their forecast and API (with bugs) sucks
+  * Implement the snake game (using IR as controller)
   * Attach music controller for disco lights
   * Add the "green" famouse matrix display
+  * Add ambilight leds
   * Use feature switches (e.g. one vs. two clocks, IR, LDR)
 * Documentation
