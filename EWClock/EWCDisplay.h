@@ -1,6 +1,9 @@
 #ifndef EWC_DISPLAY_H
 #define EWC_DISPLAY_H
 
+#define M_WIDTH 22
+#define M_HEIGHT 10
+
 #include <time.h>
 #include <NeoPixelBus.h>
 #include <Ticker.h>
@@ -25,9 +28,11 @@ class EWCDisplay
     static void testAll();
     static void fastTest();
     static void makeParty();
+    static void fire();
     static void clockLogic(); 
     typedef void (*FunctPtr)();
     void setDisplay(FunctPtr fp);
+    void setColor(unsigned char r, unsigned char g, unsigned char b);
 
   private:
     static int _ledStrip[NUM_LEDS];
@@ -53,8 +58,19 @@ class EWCDisplay
     static Ticker _ledAnim;
     static FunctPtr _currentDisplay;
     uint8_t _oldBrightness = 100;
+    static uint8_t _valueMask[M_HEIGHT][M_WIDTH];
+    static uint8_t _hueMask[M_HEIGHT][M_WIDTH];
+    static uint8_t _matrix[M_WIDTH][M_HEIGHT];
+    static uint8_t _line[M_WIDTH];
+    static uint8_t _mapping[M_WIDTH][M_HEIGHT];
+    static int _pcnt;
+    static void _setPixel(unsigned char x, unsigned char y, RgbColor rgb);
+    static void _generateLine();
+    static void _shiftUp();
+    static void _drawFrame(int pcnt);
 
-    static RgbColor _CHSV(unsigned char h, unsigned char s, unsigned char v);
+
+    static RgbColor _CHSV(unsigned char inh, unsigned char ins, unsigned char inv);
     static void _resetAndBlack();
     static void _resetStrip();
     static void _showStrip();

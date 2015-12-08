@@ -41,7 +41,7 @@ void WeatherListener::value(String value) {
     _temperatureDone = true;
   }
   else if (_lastKey == "icon" && !_weatherDone) {
-    //DEBUG_PRINTLN("-icon: " + value);
+    DEBUG_PRINTLN("-icon: " + value);
     _weatherDone = true;
     if (value == "01d" || value == "01n" ) {
       _weather((int8_t)WEATHER_SONNE);

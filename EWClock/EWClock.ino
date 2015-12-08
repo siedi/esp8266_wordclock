@@ -62,6 +62,33 @@ boolean getIR(uint8_t &command) {
       case IR_CLOCK:
         command = DISPLAY_CLOCK;
         break;
+      case IR_RED:
+        command = COLOR_RED;
+        break;
+      case IR_GREEN:
+        command = COLOR_GREEN;
+        break;
+      case IR_PURPLE:
+        command = COLOR_PURPLE;
+        break;
+      case IR_YELLOW:
+        command = COLOR_YELLOW;
+        break;
+      case IR_LIGHTBLUE:
+        command = COLOR_LIGHTBLUE;
+        break;
+      case IR_VIOLET:
+        command = COLOR_VIOLET;
+        break;
+      case IR_ORANGE:
+        command = COLOR_ORANGE;
+        break;
+      case IR_BLUE:
+        command = COLOR_BLUE;
+        break;
+      case IR_MAGENTA:
+        command = COLOR_MAGENTA;
+        break;
       default:
         DEBUG_PRINT(F("IR UNKNOWN: "));
         DEBUG_PRINTLN(String(irDecodeResults.value, HEX));
@@ -139,7 +166,7 @@ void loop()
   ArduinoOTA.handle();
   Weather.checkWeather();
   getIR(command);
-
+  
   switch (command) {
     case DISPLAY_ONOFF:
       DEBUG_PRINTLN(F("COMMAND: OFF"));
@@ -172,11 +199,48 @@ void loop()
       break;
     case DISPLAY_PROG3:
       DEBUG_PRINTLN(F("COMMAND: fastTest (PROG3)"));
-      Display.setDisplay(Display.fastTest);
+      Display.setDisplay(Display.fire);
       break;
     case DISPLAY_PROG4:
       DEBUG_PRINTLN(F("COMMAND: testAll (PROG4)"));
       Display.setDisplay(Display.testAll);
+      break;
+    case COLOR_RED:
+      DEBUG_PRINTLN(F("COMMAND: color red"));
+      Display.setColor(128, 0, 0);
+      break;
+    case COLOR_GREEN:
+      DEBUG_PRINTLN(F("COMMAND: color green"));
+      Display.setColor(0, 128, 0);
+      break;
+    case COLOR_PURPLE:
+      DEBUG_PRINTLN(F("COMMAND: color purple"));
+      Display.setColor(128, 0, 128);
+      break;
+    case COLOR_YELLOW:
+      DEBUG_PRINTLN(F("COMMAND: color yellow"));
+      Display.setColor(128, 128, 0);
+      break;
+    case COLOR_LIGHTBLUE:
+      DEBUG_PRINTLN(F("COMMAND: color lightblue"));
+      Display.setColor(0, 64, 128);
+      break;
+    case COLOR_VIOLET:
+      DEBUG_PRINTLN(F("COMMAND: color violet"));
+      Display.setColor(128, 64, 128);
+      break;
+      break;
+    case COLOR_ORANGE:
+      DEBUG_PRINTLN(F("COMMAND: color violet"));
+      Display.setColor(128, 64, 0);
+      break;    
+    case COLOR_BLUE:
+      DEBUG_PRINTLN(F("COMMAND: color blue"));
+      Display.setColor(0, 0, 128);
+      break; 
+    case COLOR_MAGENTA:
+      DEBUG_PRINTLN(F("COMMAND: color magenta"));
+      Display.setColor(64, 0, 128);
       break;
     case NOOP:
       break;
