@@ -558,6 +558,12 @@ void EWCDisplay::changeBrightness(int8_t amount)
   uint8_t speed = 100;
   
   _autoBrightness = false;
+  if (amount > 0) {
+    _defaultColor.Lighten(_defaultColor.CalculateBrightness() / amount);
+  } 
+  else {
+    _defaultColor.Darken(_defaultColor.CalculateBrightness() / abs(amount));
+  }
   for (int i = 0; i < NUM_LEDS; i++) {
     prevColor = _ledBus.GetPixelColor(i);
     if (amount > 0) {
@@ -580,6 +586,12 @@ void EWCDisplay::setBrightness(uint8_t value)
   if(value != _oldBrightness) {
     amount = value - _oldBrightness;
     _oldBrightness = value;
+    if (amount > 0) {
+      _defaultColor.Lighten(_defaultColor.CalculateBrightness() / amount);
+    } 
+    else {
+      _defaultColor.Darken(_defaultColor.CalculateBrightness() / abs(amount));
+    }
     for (int i = 0; i < NUM_LEDS; i++) {
       prevColor = _ledBus.GetPixelColor(i);
       if (amount > 0) {
@@ -629,12 +641,12 @@ void EWCDisplay::testAll()
     _leds[_testLED] = _defaultColor;
     RgbColor c;
     c = _defaultColor;
-    c.Darken(20);
+    c.Darken(30);
     if (_testLED > 0) _leds[_testLED - 1] = c;
     if (_testLED < NUM_LEDS-1) _leds[_testLED + 1] = c;
-    c.Darken(20);
+    c.Darken(30);
     if (_testLED > 1) _leds[(_testLED - 2)] = c;
-    c.Darken(20);
+    c.Darken(30);
     if (_testLED > 2) _leds[_testLED - 3] = c;
     _showStrip();
 
