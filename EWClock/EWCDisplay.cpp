@@ -20,8 +20,6 @@ RgbColor EWCDisplay::_blue = RgbColor(0, 0, 128);
 RgbColor EWCDisplay::_white = RgbColor(128);
 RgbColor EWCDisplay::_black = RgbColor(0);
 RgbColor EWCDisplay::_defaultColor = _white;
-Ticker EWCDisplay::_displayAnim;
-Ticker EWCDisplay::_ledAnim;
 typedef void (*FunctPtr)();
 FunctPtr EWCDisplay::_currentDisplay;
 
@@ -532,26 +530,6 @@ void EWCDisplay::_weatherToStrip(int8_t temperature, int8_t weather)
 }
 #endif
 
-void EWCDisplay::_triggerLedAnim()
-{
-  if (_ledBus.IsAnimating()) {
-    _ledBus.UpdateAnimations();
-    _ledBus.Show();
-  }
-  else {
-    _ledAnim.detach();
-    if (_currentDisplay) {
-      Display.setDisplay(_currentDisplay);
-    }
-  }
-}
-
-void EWCDisplay::_startLedAnim()
-{
-  _ledBus.StartAnimating();
-  _ledAnim.attach_ms(30, _triggerLedAnim);
-}
-
 bool EWCDisplay::begin()
 {
   
@@ -580,7 +558,6 @@ void EWCDisplay::changeBrightness(int8_t amount)
   uint8_t speed = 100;
   
   _autoBrightness = false;
-  _displayAnim.detach();
   for (int i = 0; i < NUM_LEDS; i++) {
     prevColor = _ledBus.GetPixelColor(i);
     if (amount > 0) {
@@ -591,7 +568,7 @@ void EWCDisplay::changeBrightness(int8_t amount)
     }
     _ledBus.LinearFadePixelColor(speed, i, prevColor);
   }
-  _startLedAnim();
+  _ledBus.StartAnimating();
 }
 
 void EWCDisplay::setBrightness(uint8_t value)
@@ -603,7 +580,6 @@ void EWCDisplay::setBrightness(uint8_t value)
   if(value != _oldBrightness) {
     amount = value - _oldBrightness;
     _oldBrightness = value;
-    _displayAnim.detach();
     for (int i = 0; i < NUM_LEDS; i++) {
       prevColor = _ledBus.GetPixelColor(i);
       if (amount > 0) {
@@ -614,20 +590,19 @@ void EWCDisplay::setBrightness(uint8_t value)
       }
       _ledBus.LinearFadePixelColor(speed, i, prevColor);
     }
-    _startLedAnim();
+    _ledBus.StartAnimating();
   }
 }
 
 void EWCDisplay::off()
 {
   DEBUG_PRINTLN(F("switching off"));
-  _displayAnim.detach();
   if (!_ledBus.IsAnimating()) {
     _resetAndBlack();
     for (int i = 0; i < NUM_LEDS; i++) {
       _ledBus.LinearFadePixelColor(1000, i, _black);
     }
-    _startLedAnim();
+    _ledBus.StartAnimating();
   }
 }
 
@@ -647,15 +622,20 @@ void EWCDisplay::showHeart()
 
 void EWCDisplay::testAll()
 {
-  DEBUG_PRINT(F("SNAKE..."));
+  DEBUG_PRINTLN(F("SNAKE..."));
   if (!_ledBus.IsAnimating()) {
     _autoBrightness = false;
     _resetAndBlack();
-    _leds[_testLED] = _red;
-    if (_testLED > 0) _leds[_testLED - 1] = RgbColor(100, 0, 0);
-    if (_testLED > 1) _leds[(_testLED - 2)] = RgbColor(60, 0, 0);
-    if (_testLED > 2) _leds[_testLED - 3] = RgbColor(30, 0, 0);
-    if (_testLED < NUM_LEDS-1) _leds[_testLED + 1] = RgbColor(100, 0, 0);
+    _leds[_testLED] = _defaultColor;
+    RgbColor c;
+    c = _defaultColor;
+    c.Darken(20);
+    if (_testLED > 0) _leds[_testLED - 1] = c;
+    if (_testLED < NUM_LEDS-1) _leds[_testLED + 1] = c;
+    c.Darken(20);
+    if (_testLED > 1) _leds[(_testLED - 2)] = c;
+    c.Darken(20);
+    if (_testLED > 2) _leds[_testLED - 3] = c;
     _showStrip();
 
     _leds[_testLED] = _black;
@@ -750,27 +730,31 @@ void EWCDisplay::clockLogic()
 
 void EWCDisplay::setDisplay(FunctPtr fp)
 {
-  float seconds = 1;
+  _displayInterval = 1000;
   _currentDisplay = fp;
   if (_currentDisplay == clockLogic) {
-    seconds = 10;
+    _displayInterval = 10000;
     _defaultColor = _white;
   }
+  else if (_currentDisplay == off) {
+    _displayInterval = 60000; // we want to run it just once, so a high value
+  }
   else if (_currentDisplay == fastTest) {
-    seconds = 10;
+    _displayInterval = 1000;
   }
   else if (_currentDisplay == makeParty) {
-    seconds = 0.5;
+    _displayInterval = 120;
   }   
   else if (_currentDisplay == showHeart) {
-    seconds = 1;
+    _displayInterval = 10000;
     _defaultColor = _red;
   }
   else if (_currentDisplay == testAll) {
-    seconds = 0.1;
+    _displayInterval = 120;
+    _defaultColor = _red;
   }
   else if (_currentDisplay == fire) {
-    seconds = 0.1;
+    _displayInterval = 120;
     randomSeed(analogRead(0));
     _generateLine();
   
@@ -782,13 +766,28 @@ void EWCDisplay::setDisplay(FunctPtr fp)
     }
   }
   (_currentDisplay)();
-  _displayAnim.attach(seconds, _currentDisplay);
 }
 
 void EWCDisplay::setColor(unsigned char r, unsigned char g, unsigned char b)
 {
   _defaultColor = RgbColor(r, g, b);
   (_currentDisplay)();
+}
+
+void EWCDisplay::handle()
+{
+  // Are we in animation mode?
+  if (_ledBus.IsAnimating()) {
+    _ledBus.UpdateAnimations();
+    _ledBus.Show();
+  }
+  else {
+    // nextrun overdue
+    if (_lastRun + _displayInterval < millis()) {
+      (_currentDisplay)();
+      _lastRun = millis();
+    }
+  }
 }
 
 EWCDisplay Display = EWCDisplay();

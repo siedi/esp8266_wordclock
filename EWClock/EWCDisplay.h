@@ -6,7 +6,6 @@
 
 #include <time.h>
 #include <NeoPixelBus.h>
-#include <Ticker.h>
 #include "EWCConfig.h"
 #if FEATURE_WEATHER()
 #include "EWCWeather.h"
@@ -19,6 +18,7 @@ class EWCDisplay
     EWCDisplay();
     ~EWCDisplay();
     bool begin();
+    void handle();
     void setAutoBrightness(boolean enabled);
     boolean getAutoBrightness();
     void setBrightness(uint8_t value);
@@ -54,10 +54,10 @@ class EWCDisplay
     static RgbColor _white;
     static RgbColor _black;
     static RgbColor _defaultColor;
-    static Ticker _displayAnim;
-    static Ticker _ledAnim;
     static FunctPtr _currentDisplay;
     uint8_t _oldBrightness = 100;
+    uint32_t _displayInterval = 1000;
+    uint32_t _lastRun = 0;
     static uint8_t _valueMask[M_HEIGHT][M_WIDTH];
     static uint8_t _hueMask[M_HEIGHT][M_WIDTH];
     static uint8_t _matrix[M_WIDTH][M_HEIGHT];
@@ -83,8 +83,6 @@ class EWCDisplay
     #if FEATURE_WEATHER()
     static void _weatherToStrip(int8_t temperature, int8_t weather);
     #endif
-    static void _triggerLedAnim();
-    static void _startLedAnim();
 };
 
 extern EWCDisplay Display;

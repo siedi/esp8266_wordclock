@@ -170,7 +170,7 @@ void loop()
   switch (command) {
     case DISPLAY_ONOFF:
       DEBUG_PRINTLN(F("COMMAND: OFF"));
-      Display.off();
+      Display.setDisplay(Display.off);
       break;
     case BRIGHTNESS_RAISE:
       DEBUG_PRINTLN(F("COMMAND: BRIGHTNESS_RAISE"));
@@ -250,6 +250,7 @@ void loop()
       break;
   }
   command = NOOP;
+  Display.handle();
   yield();
 }
 
