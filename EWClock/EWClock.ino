@@ -13,6 +13,7 @@
 #include "EWCDisplay.h"
 #if FEATURE_WEATHER()
 #include "EWCWeather.h"
+#include "EWCWebserver.h"
 #endif
 
 WebConfig* pWebConfig;
@@ -104,6 +105,7 @@ void setup()
 {
 #ifdef DEBUG
   Serial.begin(115200);
+  Serial.setDebugOutput(true);
 #endif
 
   DEBUG_PRINTLN(F("Starting"));
@@ -149,10 +151,13 @@ void setup()
   DEBUG_PRINTLN(F("Enabling IR Remote"));
   irrecv.enableIRIn();
 
+  ldrTimer.attach(10, checkLDR);
+
+  DEBUG_PRINTLN(F("Setup Webserver"));
+  Webserver.begin(81);
+
   // Initial Display
   command = DISPLAY_CLOCK;
-
-  ldrTimer.attach(10, checkLDR);
 
   DEBUG_PRINTLN(F("Setup done"));
   DEBUG_PRINT(F("IP address: "));
@@ -165,6 +170,7 @@ void loop()
   Console.handle();
   ArduinoOTA.handle();
   Weather.checkWeather();
+  Webserver.handle();
   getIR(command);
   
   switch (command) {
