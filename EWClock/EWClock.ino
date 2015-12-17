@@ -14,6 +14,7 @@
 #if FEATURE_WEATHER()
 #include "EWCWeather.h"
 #include "EWCWebserver.h"
+#include "FS.h"
 #endif
 
 WebConfig* pWebConfig;
@@ -109,7 +110,13 @@ void setup()
 #endif
 
   DEBUG_PRINTLN(F("Starting"));
+  DEBUG_PRINTLN("Mounting FS...");
 
+  if (!SPIFFS.begin()) {
+    DEBUG_PRINTLN("Failed to mount file system");
+    return;
+  }
+  
   DEBUG_PRINTLN(F("Resetting LEDs"));
   Display.begin();
 
@@ -154,7 +161,7 @@ void setup()
   ldrTimer.attach(10, checkLDR);
 
   DEBUG_PRINTLN(F("Setup Webserver"));
-  Webserver.begin(81);
+  Webserver.begin(81, Display);
 
   // Initial Display
   command = DISPLAY_CLOCK;

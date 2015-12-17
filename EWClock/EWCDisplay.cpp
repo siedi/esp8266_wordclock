@@ -22,6 +22,7 @@ RgbColor EWCDisplay::_black = RgbColor(0);
 RgbColor EWCDisplay::_defaultColor = _white;
 typedef void (*FunctPtr)();
 FunctPtr EWCDisplay::_currentDisplay;
+const char* EWCDisplay::_displayList[] = {"off", "heart", "test", "fasttest", "party", "fire", "clock", 0};
 
 // for the fire from https://github.com/giladaya/arduino-led-matrix/blob/master/fire/fire.ino
 //these values are substracetd from the generated values to give a shape to the animation
@@ -744,29 +745,37 @@ void EWCDisplay::setDisplay(FunctPtr fp)
 {
   _displayInterval = 1000;
   _currentDisplay = fp;
+  _currentDisplayId = 0;
   if (_currentDisplay == clockLogic) {
     _displayInterval = 10000;
     _defaultColor = _white;
+    _currentDisplayId = 6;
   }
   else if (_currentDisplay == off) {
     _displayInterval = 60000; // we want to run it just once, so a high value
+    _currentDisplayId = 0;
   }
   else if (_currentDisplay == fastTest) {
     _displayInterval = 1000;
+    _currentDisplayId = 3;
   }
   else if (_currentDisplay == makeParty) {
     _displayInterval = 120;
+    _currentDisplayId = 4;
   }   
   else if (_currentDisplay == showHeart) {
     _displayInterval = 10000;
     _defaultColor = _red;
+    _currentDisplayId = 1;
   }
   else if (_currentDisplay == testAll) {
     _displayInterval = 120;
     _defaultColor = _red;
+    _currentDisplayId = 2;
   }
   else if (_currentDisplay == fire) {
     _displayInterval = 120;
+    _currentDisplayId = 5;
     randomSeed(analogRead(0));
     _generateLine();
   
@@ -780,10 +789,52 @@ void EWCDisplay::setDisplay(FunctPtr fp)
   (_currentDisplay)();
 }
 
+uint8_t EWCDisplay::getDisplay()
+{
+  return _currentDisplayId;
+}
+
+const char **EWCDisplay::getDisplayList()
+{
+  return _displayList;
+}
+
+void EWCDisplay::setDisplay(uint8_t displayId)
+{
+  switch(displayId) {
+    case 0: 
+      setDisplay(off);
+      break;
+    case 1: 
+      setDisplay(showHeart);
+      break;
+    case 2: 
+      setDisplay(testAll);
+      break;
+    case 3: 
+      setDisplay(fastTest);
+      break;
+    case 4: 
+      setDisplay(makeParty);
+      break;
+    case 5: 
+      setDisplay(fire);
+      break;
+    case 6: 
+      setDisplay(clockLogic);
+      break;
+  }  
+}
+
 void EWCDisplay::setColor(unsigned char r, unsigned char g, unsigned char b)
 {
   _defaultColor = RgbColor(r, g, b);
   (_currentDisplay)();
+}
+
+RgbColor EWCDisplay::getColor()
+{
+  return _defaultColor;
 }
 
 void EWCDisplay::handle()
@@ -796,6 +847,7 @@ void EWCDisplay::handle()
   else {
     // nextrun overdue
     if (_lastRun + _displayInterval < millis()) {
+      DEBUG_MSG("");
       (_currentDisplay)();
       _lastRun = millis();
     }

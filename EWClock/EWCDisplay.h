@@ -32,9 +32,14 @@ class EWCDisplay
     static void clockLogic(); 
     typedef void (*FunctPtr)();
     void setDisplay(FunctPtr fp);
+    void setDisplay(uint8_t displayId);
+    uint8_t getDisplay();
+    static const char **getDisplayList();
     void setColor(unsigned char r, unsigned char g, unsigned char b);
+    RgbColor getColor();
 
   private:
+    static const char *_displayList[];
     static int _ledStrip[NUM_LEDS];
     static int _stackptr;
     static uint8_t _testHours;
@@ -55,6 +60,7 @@ class EWCDisplay
     static RgbColor _black;
     static RgbColor _defaultColor;
     static FunctPtr _currentDisplay;
+    uint8_t _currentDisplayId;
     uint8_t _oldBrightness = 100;
     uint32_t _displayInterval = 1000;
     uint32_t _lastRun = 0;

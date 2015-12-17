@@ -7,6 +7,7 @@
     <title>ESP8266 Wordclock</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" media="all" href="css/jquery.minicolors.css">
     <link href="dashboard.css" rel="stylesheet">
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -24,34 +25,56 @@
       </div>
     </nav>
     
-    <div class="container-fluid">
+    <div class="container">
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
-            <li><a href="#">Wifi</a></li>
-            <li><a href="#">IR Remote</a></li>
-            <li><a href="#">Display</a></li>
-            <li><a href="/mem.htm">Memory</a></li>
+            <li class="active"><a href="#/pages/dashboard.htm" data-url="/pages/dashboard.htm">Dashboard <span class="sr-only">(current)</span></a></li>
+            <li><a href="#/pages/network.htm" data-url="/pages/network.htm">Network</a></li>
+            <li><a href="#/pages/ir.htm" data-url="/pages/ir.htm">IR Remote</a></li>
+            <li><a href="#/pages/display.htm" data-url="/pages/display.htm">Display</a></li>
+            <li><a href="#/pages/system.htm" dta-url="/pages/system.htm">System</a></li>
           </ul>
         </div> <!-- // end sidebar -->
         
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <h1 class="page-header">Dashboard</h1>
-          <div class="row placeholders">
-            <span id="all"></span>
-          </div>
-        </div> <!-- // end main -->
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" id="content">
+        </div>
       </div> <!-- // end row -->
     </div> <!-- // end container -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+     integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script>
+    var Fragment = (function () {
+      return {
+        init: function() {
+          if (location.hash.substr(1) != '') {
+            Fragment.load(location.hash.substr(1));    
+          } else {
+            Fragment.load('/pages/dashboard.htm');
+          }
+          $(window).on('hashchange', function () {
+            if (location.hash.substr(1) == '') { // no hash tag / homepage
+              Fragment.load('/pages/dashboard.htm');
+            } else {
+              Fragment.load(location.hash.substr(1));
+            }  
+          });         
+        },
+        load: function (url) {     
+          $('#content').load(url);
+          $("li.active").removeClass("active");
+          $("ul.nav li").each(function() {
+            if ( $(this).children("a[href$='" + url + "']").length ){
+              $(this).addClass("active");
+            }
+          });
+        }
+      }
+    })();
+    
     $(document).ready(function() {
-      $.getJSON('/all', function(data) {
-        alert(JSON.stringify(data));
-        $('#all').append(JSON.stringify(data));
-      });
+      Fragment.init();
     });
     </script>
   </body>

@@ -141,7 +141,132 @@ void EWCWebserver::_handleFileList()
   _webserver.send(200, "text/json", output);
 }
 
-void EWCWebserver::begin(int port = 80)
+void EWCWebserver::_handleDisplayCurrent()
+{
+  uint8_t dId = _display->getDisplay();
+
+  RgbColor c = _display->getColor();
+
+  String output = "{\"displayId\":";
+  output += dId;
+  output += ",";
+  output += "\"color\":\"#";
+  String chex = String(c.R, HEX);
+  if (chex.length() == 1) {
+    output += "0";
+  }
+  output += chex;
+  chex = String(c.G, HEX);
+  if (chex.length() == 1) {
+    output += "0";
+  }
+  output += chex;
+  chex = String(c.B, HEX);
+  if (chex.length() == 1) {
+    output += "0";
+  }
+  output += chex;
+  output += "\"}";
+  _webserver.send(200, "text/json", output);
+}
+
+void EWCWebserver::_handleDisplayList()
+{
+  DEBUG_MSG("begin");
+  const char **l = _display->getDisplayList();
+  String output = "[";
+  int i = 0;
+  while(l[i]) {
+    if (output != "[") {
+      output += ",";
+    }
+    output += "{\"id\":";
+    output += i;
+    output += ", \"name\":\"";
+    output += l[i];
+    output += "\"}";
+    i++;
+  }
+  output = String("{\"displays\":") + output;
+  output += "]}";
+  _webserver.send(200, "text/json", output);
+  DEBUG_MSG("output: " + output);
+}
+
+void EWCWebserver::_handleDisplayUpdate()
+{
+  DEBUG_MSG("begin");
+  String buf = _webserver.arg(0);
+  DEBUG_MSG("buf: " + buf);
+  yield();
+  StaticJsonBuffer<80> jsonBuffer;
+  JsonObject& json = jsonBuffer.parseObject(buf);
+  if (!json.success()) {
+    DEBUG_MSG("[Failed to parse input");
+    _webserver.send(500, "text/json", "{\"error\":\"Failed to parse input\"}");
+    return;
+  }
+  uint8_t displayId = json["id"];
+  DEBUG_MSG("displayId: " + String(displayId));
+  yield();
+  _display->setDisplay(displayId);
+  yield();
+  _webserver.send(200, "text/json", "{}");
+  DEBUG_MSG("end");
+}
+
+void EWCWebserver::_handleDisplayColorUpdate()
+{
+  DEBUG_MSG("begin");
+  String buf = _webserver.arg(0);
+  DEBUG_MSG("buf: " + buf);
+  yield();
+  StaticJsonBuffer<80> jsonBuffer;
+  JsonObject& json = jsonBuffer.parseObject(buf);
+  if (!json.success()) {
+    DEBUG_PRINTLN("[EWCWebserver::_handleDisplayColorUpdate] Failed to parse input");
+    _webserver.send(500, "text/json", "{\"error\":\"Failed to parse input\"}");
+    return;
+  }
+  const char* color = json["color"];
+  uint32_t colorCode = strtol( &color[1], NULL, 16);
+  DEBUG_MSG("colorCode: " + String(colorCode));
+  yield();
+  _display->setColor(colorCode >> 16, colorCode >> 8 & 0xFF, colorCode & 0xFF);
+  yield();
+  _webserver.send(200, "text/json", "{}");
+  DEBUG_MSG("end");
+}
+
+void EWCWebserver::_handleConfigDisplay()
+{
+  uint8_t dId = 6;
+  RgbColor c = _display->getColor();
+    
+  String output = "{\"defaultDisplayID\":";
+  output += dId;
+  output += ",";
+  output += "\"defaultColor\":\"#";
+  String chex = String(c.R, HEX);
+  if (chex.length() == 1) {
+    output += "0";
+  }
+  output += chex;
+  chex = String(c.G, HEX);
+  if (chex.length() == 1) {
+    output += "0";
+  }
+  output += chex;
+  chex = String(c.B, HEX);
+  if (chex.length() == 1) {
+    output += "0";
+  }
+  output += chex;
+  output += "\"}";
+  _webserver.send(200, "text/json", output);
+}
+
+void EWCWebserver::begin(int port, EWCDisplay &display)
 {
   SPIFFS.begin();
   {
@@ -154,6 +279,7 @@ void EWCWebserver::begin(int port = 80)
     Console.printf("\n");
   }
   _webserver = ESP8266WebServer(port);
+  _display = &display;
 
   //list directory
   _webserver.on("/list", HTTP_GET, std::bind(&EWCWebserver::_handleFileList, this));
@@ -172,10 +298,16 @@ void EWCWebserver::begin(int port = 80)
   //called when the url is not defined here
   //use it to load content from SPIFFS
   _webserver.onNotFound([&](){
-  if(!_handleFileRead(_webserver.uri()))
+    if(!_handleFileRead(_webserver.uri()))
       _webserver.send(404, "text/plain", "FileNotFound");
   });
 
+  _webserver.on("/api/display/current", HTTP_GET, std::bind(&EWCWebserver::_handleDisplayCurrent, this));
+  _webserver.on("/api/display/list", HTTP_GET, std::bind(&EWCWebserver::_handleDisplayList, this));
+  _webserver.on("/api/display", HTTP_PUT, std::bind(&EWCWebserver::_handleDisplayUpdate, this));
+  _webserver.on("/api/display/color", HTTP_PUT, std::bind(&EWCWebserver::_handleDisplayColorUpdate, this));
+  _webserver.on("/api/config/display", HTTP_GET, std::bind(&EWCWebserver::_handleConfigDisplay, this));
+    
   //get heap status, analog input value and all GPIO statuses in one json call
   _webserver.on("/all", HTTP_GET, [&](){
     String json = "{";
