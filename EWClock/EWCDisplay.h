@@ -4,13 +4,14 @@
 #define M_WIDTH 22
 #define M_HEIGHT 10
 
-#include <time.h>
+//#include <time.h>
 #include <NeoPixelBus.h>
 #include "EWCConfig.h"
 #if FEATURE_WEATHER()
 #include "EWCWeather.h"
 #endif
 #include "ESP8266Console.h"
+#include "EWCTime.h"
 
 class EWCDisplay
 {

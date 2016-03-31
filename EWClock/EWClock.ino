@@ -1,6 +1,5 @@
 #include <EEPROM.h>
 #include <ESP8266WiFi.h>
-#include <time.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
@@ -10,12 +9,13 @@
 #include "WebConfig.h"
 #include "EWCConfig.h"
 #include "ESP8266Console.h"
+#include "EWCTime.h"
 #include "EWCDisplay.h"
 #if FEATURE_WEATHER()
 #include "EWCWeather.h"
+#endif
 #include "EWCWebserver.h"
 #include "FS.h"
-#endif
 
 WebConfig* pWebConfig;
 
@@ -23,11 +23,12 @@ WebConfig* pWebConfig;
 IRrecv irrecv(IR_RECV_PIN);
 decode_results irDecodeResults;
 Ticker ldrTimer;
+
 uint8_t command = NOOP;
 
 void checkLDR()
 {
-  if(Display.getAutoBrightness()) {
+  if (Display.getAutoBrightness()) {
     DEBUG_PRINT(F("LDR: "));
     int ldrVal = map(analogRead(LDR_PIN), 0, 1023, 0, 100);
     DEBUG_PRINTLN(ldrVal);
@@ -116,7 +117,7 @@ void setup()
     DEBUG_PRINTLN("Failed to mount file system");
     return;
   }
-  
+
   DEBUG_PRINTLN(F("Resetting LEDs"));
   Display.begin();
 
@@ -151,19 +152,19 @@ void setup()
   MDNS.addService("http", "tcp", 80);
 
   Console.begin();
-  
-  configTime(NTP_TIMEZONE * 3600, 0, const_cast<char *>(NTP_SERVER));
-  
-  // IR setup
+
+  DEBUG_PRINTLN(F("Setting up SNTP")); 
+  Time.begin();
+
   DEBUG_PRINTLN(F("Enabling IR Remote"));
   irrecv.enableIRIn();
 
+  DEBUG_PRINTLN(F("Enabling IR Remote"));
   ldrTimer.attach(10, checkLDR);
 
   DEBUG_PRINTLN(F("Setup Webserver"));
   Webserver.begin(81, Display);
 
-  // Initial Display
   command = DISPLAY_CLOCK;
 
   DEBUG_PRINTLN(F("Setup done"));
@@ -179,7 +180,7 @@ void loop()
   Weather.checkWeather();
   Webserver.handle();
   getIR(command);
-  
+
   switch (command) {
     case DISPLAY_ONOFF:
       DEBUG_PRINTLN(F("COMMAND: OFF"));
@@ -246,11 +247,11 @@ void loop()
     case COLOR_ORANGE:
       DEBUG_PRINTLN(F("COMMAND: color violet"));
       Display.setColor(128, 64, 0);
-      break;    
+      break;
     case COLOR_BLUE:
       DEBUG_PRINTLN(F("COMMAND: color blue"));
       Display.setColor(0, 0, 128);
-      break; 
+      break;
     case COLOR_MAGENTA:
       DEBUG_PRINTLN(F("COMMAND: color magenta"));
       Display.setColor(64, 0, 128);
@@ -266,4 +267,3 @@ void loop()
   Display.handle();
   yield();
 }
-

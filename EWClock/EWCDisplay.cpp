@@ -732,7 +732,7 @@ void EWCDisplay::clockLogic()
   DEBUG_PRINTLN(F("Clock..."));
   if (!_ledBus.IsAnimating()) {
     _resetAndBlack();
-    time_t now = time(nullptr);
+    time_t now = Time.now();
     _timeToStrip(localtime(&now)->tm_hour, localtime(&now)->tm_min);
     #if FEATURE_WEATHER()
     _weatherToStrip(Weather.getTemperature(), Weather.getWeather());
