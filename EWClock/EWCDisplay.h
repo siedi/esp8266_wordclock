@@ -4,7 +4,6 @@
 #define M_WIDTH 22
 #define M_HEIGHT 10
 
-//#include <time.h>
 #include <NeoPixelBus.h>
 #include "EWCConfig.h"
 #if FEATURE_WEATHER()
