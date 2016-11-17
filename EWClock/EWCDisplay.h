@@ -6,14 +6,15 @@
 
 #include <time.h>
 #include <NeoPixelBus.h>
+#include <NeoPixelAnimator.h>
 #include "EWCConfig.h"
 #if FEATURE_WEATHER()
 #include "EWCWeather.h"
 #endif
-#include "ESP8266Console.h"
 
 class EWCDisplay
 {
+
   public:
     EWCDisplay();
     ~EWCDisplay();
@@ -46,7 +47,8 @@ class EWCDisplay
     static uint8_t _testLED;
     static uint8_t _languageMode;
     static boolean _autoBrightness;
-    static NeoPixelBus _ledBus;
+    //static NeoPixelBus _ledBus;
+    //static NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> _ledBus;
     static RgbColor _leds[NUM_LEDS];
     static RgbColor _red;
     static RgbColor _green;
@@ -69,8 +71,6 @@ class EWCDisplay
     static void _shiftUp();
     static void _drawFrame(int pcnt);
 
-
-    static RgbColor _CHSV(unsigned char inh, unsigned char ins, unsigned char inv);
     static void _resetAndBlack();
     static void _resetStrip();
     static void _showStrip();

@@ -12,7 +12,10 @@ uint8_t EWCDisplay::_testWeather = 0;
 uint8_t EWCDisplay::_testLED = 0;
 uint8_t EWCDisplay::_languageMode = RHEIN_RUHR_MODE;
 boolean EWCDisplay::_autoBrightness = false;
-NeoPixelBus EWCDisplay::_ledBus = NeoPixelBus(NUM_LEDS, STRIP_DATA_PIN);
+
+NeoPixelBus<NeoRgbFeature, NeoEsp8266BitBang800KbpsMethod> _ledBus(NUM_LEDS, STRIP_DATA_PIN);
+NeoPixelAnimator _animations(1);
+
 RgbColor EWCDisplay::_leds[NUM_LEDS];
 RgbColor EWCDisplay::_red = RgbColor(128, 0, 0);
 RgbColor EWCDisplay::_green = RgbColor(0, 128, 0);
@@ -24,32 +27,33 @@ typedef void (*FunctPtr)();
 FunctPtr EWCDisplay::_currentDisplay;
 
 // for the fire from https://github.com/giladaya/arduino-led-matrix/blob/master/fire/fire.ino
-//these values are substracetd from the generated values to give a shape to the animation
+// these values are substracetd from the generated values to give a shape to the animation
 uint8_t EWCDisplay::_valueMask[M_HEIGHT][M_WIDTH] = {
-    {32 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 32 , 32 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 32 },
-    {48 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 48 , 48 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 48 },
-    {64 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 48 , 48 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 64 },
-    {96 , 32 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 32 , 64 , 64 , 32 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 32 , 96 },
-    {128, 64 , 32 , 0  , 0  , 0  , 0  , 0  , 0  , 32 , 96 , 96 , 32 , 0  , 0  , 0  , 0  , 0  , 0  , 32 , 64 , 128},
-    {160, 96 , 64 , 32 , 0  , 0  , 0  , 0  , 32 , 64 , 128, 128, 64 , 32 , 0  , 0  , 0  , 0  , 32 , 64 , 96 , 160},
-    {192, 128, 96 , 64 , 32 , 0  , 0  , 32 , 64 , 96 , 160, 160, 96 , 64 , 32 , 0  , 0  , 32 , 64 , 96 , 128, 192},
-    {255, 160, 128, 96 , 96 , 64 , 32 , 64 , 96 , 128, 192, 192, 128, 96 , 64 , 32 , 64 , 96 , 96 , 128, 160, 255},
-    {255, 192, 160, 128, 96 , 64 , 96 , 96 , 128, 160, 255, 255, 160, 128, 96 , 96 , 64 , 96 , 128, 160, 192, 255},
-    {255, 255, 192, 160, 128, 94 , 96 , 128, 160, 192, 255, 255, 192, 160, 128, 96 , 94 , 128, 160, 192, 255, 255}
+  {32 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 32 , 32 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 32 },
+  {48 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 48 , 48 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 48 },
+  {64 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 48 , 48 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 64 },
+  {96 , 32 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 32 , 64 , 64 , 32 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 32 , 96 },
+  {128, 64 , 32 , 0  , 0  , 0  , 0  , 0  , 0  , 32 , 96 , 96 , 32 , 0  , 0  , 0  , 0  , 0  , 0  , 32 , 64 , 128},
+  {160, 96 , 64 , 32 , 0  , 0  , 0  , 0  , 32 , 64 , 128, 128, 64 , 32 , 0  , 0  , 0  , 0  , 32 , 64 , 96 , 160},
+  {192, 128, 96 , 64 , 32 , 0  , 0  , 32 , 64 , 96 , 160, 160, 96 , 64 , 32 , 0  , 0  , 32 , 64 , 96 , 128, 192},
+  {255, 160, 128, 96 , 96 , 64 , 32 , 64 , 96 , 128, 192, 192, 128, 96 , 64 , 32 , 64 , 96 , 96 , 128, 160, 255},
+  {255, 192, 160, 128, 96 , 64 , 96 , 96 , 128, 160, 255, 255, 160, 128, 96 , 96 , 64 , 96 , 128, 160, 192, 255},
+  {255, 255, 192, 160, 128, 94 , 96 , 128, 160, 192, 255, 255, 192, 160, 128, 96 , 94 , 128, 160, 192, 255, 255}
 };
-//these are the hues for the fire, 
-//should be between 0 (red) to about 13 (yellow)
+
+// these are the hues for the fire,
+// should be between 0 (red) to about 13 (yellow)
 uint8_t EWCDisplay::_hueMask[M_HEIGHT][M_WIDTH] = {
-    {1, 4, 7, 9, 13, 13, 10, 12, 8, 4, 1,     1, 4, 7, 9, 13, 13, 10, 12, 8, 4, 1},
-    {1, 4, 7, 9, 9 , 13, 11, 10, 8, 4, 1,     1, 4, 7, 9, 9 , 13, 11, 10, 8, 4, 1},
-    {1, 3, 5, 7, 9 , 9 , 10, 8 , 6, 4, 1,     1, 3, 5, 7, 9 , 9 , 10, 8 , 6, 4, 1},
-    {1, 3, 5, 7, 9 , 9 , 8 , 6 , 4, 3, 1,     1, 3, 5, 7, 9 , 9 , 8 , 6 , 4, 3, 1},
-    {1, 2, 5, 7, 8 , 8 , 7 , 6 , 3, 3, 1,     1, 2, 5, 7, 8 , 8 , 7 , 6 , 3, 3, 1},
-    {0, 1, 3, 5, 6 , 7 , 7 , 5 , 3, 2, 1,     0, 1, 3, 5, 6 , 7 , 7 , 5 , 3, 2, 1},
-    {0, 1, 4, 4, 5 , 6 , 6 , 4 , 3, 1, 0,     0, 1, 4, 4, 5 , 6 , 6 , 4 , 3, 1, 0},
-    {0, 0, 1, 3, 4 , 4 , 4 , 2 , 2, 1, 0,     0, 0, 1, 3, 4 , 4 , 4 , 2 , 2, 1, 0},
-    {0, 0, 0, 1, 2 , 3 , 2 , 2 , 1, 0, 0,     0, 0, 0, 1, 2 , 3 , 2 , 2 , 1, 0, 0},
-    {0, 0, 0, 0, 1 , 1 , 1 , 0 , 0, 0, 0,     0, 0, 0, 0, 1 , 1 , 1 , 0 , 0, 0, 0}
+  {1, 4, 7, 9, 13, 13, 10, 12, 8, 4, 1,     1, 4, 7, 9, 13, 13, 10, 12, 8, 4, 1},
+  {1, 4, 7, 9, 9 , 13, 11, 10, 8, 4, 1,     1, 4, 7, 9, 9 , 13, 11, 10, 8, 4, 1},
+  {1, 3, 5, 7, 9 , 9 , 10, 8 , 6, 4, 1,     1, 3, 5, 7, 9 , 9 , 10, 8 , 6, 4, 1},
+  {1, 3, 5, 7, 9 , 9 , 8 , 6 , 4, 3, 1,     1, 3, 5, 7, 9 , 9 , 8 , 6 , 4, 3, 1},
+  {1, 2, 5, 7, 8 , 8 , 7 , 6 , 3, 3, 1,     1, 2, 5, 7, 8 , 8 , 7 , 6 , 3, 3, 1},
+  {0, 1, 3, 5, 6 , 7 , 7 , 5 , 3, 2, 1,     0, 1, 3, 5, 6 , 7 , 7 , 5 , 3, 2, 1},
+  {0, 1, 4, 4, 5 , 6 , 6 , 4 , 3, 1, 0,     0, 1, 4, 4, 5 , 6 , 6 , 4 , 3, 1, 0},
+  {0, 0, 1, 3, 4 , 4 , 4 , 2 , 2, 1, 0,     0, 0, 1, 3, 4 , 4 , 4 , 2 , 2, 1, 0},
+  {0, 0, 0, 1, 2 , 3 , 2 , 2 , 1, 0, 0,     0, 0, 0, 1, 2 , 3 , 2 , 2 , 1, 0, 0},
+  {0, 0, 0, 0, 1 , 1 , 1 , 0 , 0, 0, 0,     0, 0, 0, 0, 1 , 1 , 1 , 0 , 0, 0, 0}
 };
 uint8_t EWCDisplay::_matrix[M_WIDTH][M_HEIGHT];
 uint8_t EWCDisplay::_line[M_WIDTH];
@@ -81,68 +85,70 @@ int EWCDisplay::_pcnt = 0;
 
 void EWCDisplay::_setPixel(unsigned char x, unsigned char y, RgbColor rgb)
 {
-    int i = _mapping[x][y];
-    _leds[i] = rgb;
+  int i = _mapping[x][y];
+  _leds[i] = rgb;
 }
+
 /**
- * Randomly generate the next line (matrix row)
- */
+   Randomly generate the next line (matrix row)
+*/
 void EWCDisplay::_generateLine()
 {
-  for(unsigned char x=0; x < M_WIDTH; x++) {
-      _line[x] = random(64, 255);
+  for (unsigned char x = 0; x < M_WIDTH; x++) {
+    _line[x] = random(64, 255);
   }
 }
+
 /**
- * shift all values in the matrix up one row
- */
+   shift all values in the matrix up one row
+*/
 void EWCDisplay::_shiftUp()
 {
-  for (unsigned char y=M_HEIGHT-1;y>0;y--) {
-    for(unsigned char x=0;x<M_WIDTH;x++) {
-        _matrix[x][y] = _matrix[x][y-1];
+  for (unsigned char y = M_HEIGHT - 1; y > 0; y--) {
+    for (unsigned char x = 0; x < M_WIDTH; x++) {
+      _matrix[x][y] = _matrix[x][y - 1];
     }
   }
-  
-  for(unsigned char x=0;x<M_WIDTH;x++) {
-      _matrix[x][0] = _line[x];
+
+  for (unsigned char x = 0; x < M_WIDTH; x++) {
+    _matrix[x][0] = _line[x];
   }
 }
+
 /**
- * draw a frame, interpolating between 2 "key frames"
- * @param pcnt percentage of interpolation
- */
+   draw a frame, interpolating between 2 "key frames"
+   @param pcnt percentage of interpolation
+*/
 void EWCDisplay::_drawFrame(int pcnt)
 {
   int nextv;
   unsigned char h;
   unsigned char s;
   unsigned char v;
-  
+
   //each row interpolates with the one before it
-  for (unsigned char y=M_HEIGHT-1;y>0;y--) {
-    for (unsigned char x=0;x<M_WIDTH;x++) {
-        h = _hueMask[y][x];
-        s = 255;
-        nextv = 
-            (((100.0-pcnt)*_matrix[x][y] 
-          + _pcnt*_matrix[x][y-1])/100.0) 
-          - _valueMask[y][x];
-        v = (unsigned char)max(0, nextv);
-        _setPixel(x, y, _CHSV(h, s, v));
+  for (unsigned char y = M_HEIGHT - 1; y > 0; y--) {
+    for (unsigned char x = 0; x < M_WIDTH; x++) {
+      h = _hueMask[y][x];
+      s = 255;
+      nextv =
+        (((100.0 - pcnt) * _matrix[x][y]
+          + _pcnt * _matrix[x][y - 1]) / 100.0)
+        - _valueMask[y][x];
+      v = (unsigned char)_max(0, nextv);
+      _setPixel(x, y, RgbColor(HsbColor(h, s, v)));
     }
   }
-  
+
   //first row interpolates with the "next" line
-  for(unsigned char x=0;x<M_WIDTH;x++) {
-      h = _hueMask[0][x];
-      s = 255;
-      v = (unsigned char)(((100.0-_pcnt)*_matrix[x][0] + _pcnt*_line[x])/100.0);
-      
-      _setPixel(x, 0, _CHSV(h, s, v));
+  for (unsigned char x = 0; x < M_WIDTH; x++) {
+    h = _hueMask[0][x];
+    s = 255;
+    v = (unsigned char)(((100.0 - _pcnt) * _matrix[x][0] + _pcnt * _line[x]) / 100.0);
+
+    _setPixel(x, 0, RgbColor(HsbColor(h, s, v)));
   }
 }
-
 
 EWCDisplay::EWCDisplay()
 {
@@ -151,52 +157,7 @@ EWCDisplay::EWCDisplay()
 
 EWCDisplay::~EWCDisplay()
 {
-  
-}
 
-// TODO get rid of and replace with fastled function
-RgbColor EWCDisplay::_CHSV(unsigned char inh, unsigned char ins, unsigned char inv)
-{
-  float r, g, b, h, s, v; //this function works with floats between 0 and 1
-  float f, p, q, t;
-  int i;
-
-  RgbColor colorRGB;
-
-  h = (float)(inh / 256.0);
-  s = (float)(ins / 256.0);
-  v = (float)(inv / 256.0);
-
-  //if saturation is 0, the color is a shade of grey
-  if(s == 0.0) {
-    b = v;
-    g = b;
-    r = g;
-  }
-  //if saturation > 0, more complex calculations are needed
-  else
-  {
-    h *= 6.0; //to bring hue to a number between 0 and 6, better for the calculations
-    i = (int)(floor(h)); //e.g. 2.7 becomes 2 and 3.01 becomes 3 or 4.9999 becomes 4
-    f = h - i;//the fractional part of h
-
-    p = (float)(v * (1.0 - s));
-    q = (float)(v * (1.0 - (s * f)));
-    t = (float)(v * (1.0 - (s * (1.0 - f))));
-
-    switch(i)
-    {
-      case 0: r=v; g=t; b=p; break;
-      case 1: r=q; g=v; b=p; break;
-      case 2: r=p; g=v; b=t; break;
-      case 3: r=p; g=q; b=v; break;
-      case 4: r=t; g=p; b=v; break;
-      case 5: r=v; g=p; b=q; break;
-      default: r = g = b = 0; break;
-    }
-  }
-  
-  return RgbColor((unsigned char)(r * 255.0), (unsigned char)(g * 255.0), (unsigned char)(b * 255.0));
 }
 
 void EWCDisplay::_resetStrip()
@@ -240,7 +201,7 @@ void EWCDisplay::_displayStrip()
 void EWCDisplay::_displayStripRandomColor()
 {
   for (int i = 0; i < _stackptr; i++) {
-    _leds[_ledStrip[i]] = _CHSV(random(0, 255), 255, 255);
+    _leds[_ledStrip[i]] = RgbColor(HsbColor(random(0, 255), 255, 255));
   }
   _showStrip();
 }
@@ -253,7 +214,7 @@ void EWCDisplay::_pushToStrip(int ledId)
 
 void EWCDisplay::_pushToStrip(int leds[], uint8_t size)
 {
-  for(int i = 0; i < size; i++) {
+  for (int i = 0; i < size; i++) {
     _pushToStrip(leds[i]);
   }
 }
@@ -265,58 +226,58 @@ void EWCDisplay::_timeToStrip(uint8_t hours, uint8_t minutes)
   if (minutes >= 5 && minutes < 10) {
     STRIP_PRINT(W1_FUENF1)
     STRIP_PRINT(W1_NACH)
-  } 
+  }
   else if (minutes >= 10 && minutes < 15) {
     STRIP_PRINT(W1_ZEHN1)
     STRIP_PRINT(W1_NACH)
-  } 
+  }
   else if (minutes >= 15 && minutes < 20) {
     STRIP_PRINT(W1_VIERTEL)
     STRIP_PRINT(W1_NACH)
-  } 
+  }
   else if (minutes >= 20 && minutes < 25) {
     if (_languageMode == RHEIN_RUHR_MODE) {
       STRIP_PRINT(W1_ZWANZIG)
       STRIP_PRINT(W1_NACH)
-    } 
+    }
     else if (_languageMode == WESSI_MODE) {
       STRIP_PRINT(W1_ZEHN1)
       STRIP_PRINT(W1_VOR)
       STRIP_PRINT(W1_HALB)
     }
-  } 
+  }
   else if (minutes >= 25 && minutes < 30) {
     STRIP_PRINT(W1_FUENF1)
     STRIP_PRINT(W1_VOR)
     STRIP_PRINT(W1_HALB)
-  } 
+  }
   else if (minutes >= 30 && minutes < 35) {
     STRIP_PRINT(W1_HALB)
-  } 
+  }
   else if (minutes >= 35 && minutes < 40) {
     STRIP_PRINT(W1_FUENF1)
     STRIP_PRINT(W1_NACH)
     STRIP_PRINT(W1_HALB)
-  } 
+  }
   else if (minutes >= 40 && minutes < 45) {
     if (_languageMode == RHEIN_RUHR_MODE) {
       STRIP_PRINT(W1_ZWANZIG)
       STRIP_PRINT(W1_VOR)
-    } 
+    }
     else if (_languageMode == WESSI_MODE) {
       STRIP_PRINT(W1_ZEHN1)
       STRIP_PRINT(W1_NACH)
       STRIP_PRINT(W1_HALB)
     }
-  } 
+  }
   else if (minutes >= 45 && minutes < 50) {
     STRIP_PRINT(W1_VIERTEL)
     STRIP_PRINT(W1_VOR)
-  } 
+  }
   else if (minutes >= 50 && minutes < 55) {
     STRIP_PRINT(W1_ZEHN1)
     STRIP_PRINT(W1_VOR)
-  } 
+  }
   else if (minutes >= 55 && minutes < 60) {
     STRIP_PRINT(W1_FUENF1)
     STRIP_PRINT(W1_VOR)
@@ -352,7 +313,7 @@ void EWCDisplay::_timeToStrip(uint8_t hours, uint8_t minutes)
     if (minutes >= 25) {
       hours++;
     }
-  } 
+  }
   else if (_languageMode == WESSI_MODE) {
     if (minutes >= 20) {
       hours++;
@@ -430,7 +391,7 @@ void EWCDisplay::_weatherToStrip(int8_t temperature, int8_t weather)
       break;
     case 1:
       STRIP_PRINT(W2_FUENF)
-      break;   
+      break;
     case 2:
       STRIP_PRINT(W2_ZEHN)
       break;
@@ -478,17 +439,17 @@ void EWCDisplay::_weatherToStrip(int8_t temperature, int8_t weather)
   }
 
   if (abs(temperature) > 39) {
-      STRIP_PRINT(W2_FUENF)
-      STRIP_PRINT(W2_UND)
-      STRIP_PRINT(W2_DREISSIG)
-      STRIP_PRINT(W2_ONE)
-      STRIP_PRINT(W2_TWO)
-      STRIP_PRINT(W2_THREE)
-      STRIP_PRINT(W2_FOUR)
+    STRIP_PRINT(W2_FUENF)
+    STRIP_PRINT(W2_UND)
+    STRIP_PRINT(W2_DREISSIG)
+    STRIP_PRINT(W2_ONE)
+    STRIP_PRINT(W2_TWO)
+    STRIP_PRINT(W2_THREE)
+    STRIP_PRINT(W2_FOUR)
   }
 
   STRIP_PRINT(W2_GRAD)
-  
+
   if (weather > 0) {
     STRIP_PRINT(W2_UND2)
 
@@ -506,13 +467,13 @@ void EWCDisplay::_weatherToStrip(int8_t temperature, int8_t weather)
         STRIP_PRINT(W2_SONNE)
         STRIP_PRINT(W2_MIT)
         STRIP_PRINT(W2_WOLKEN)
-        break;      
+        break;
       case WEATHER_NIESEL:
         STRIP_PRINT(W2_NIESEL)
         break;
       case WEATHER_SCHNEE:
         STRIP_PRINT(W2_SCHNEE)
-        break;       
+        break;
       case WEATHER_REGEN:
         STRIP_PRINT(W2_REGEN)
         break;
@@ -522,9 +483,9 @@ void EWCDisplay::_weatherToStrip(int8_t temperature, int8_t weather)
         break;
       case WEATHER_STURM:
         STRIP_PRINT(W2_STURM)
-        break; 
+        break;
     }
-    STRIP_PRINT(W2_GEBEN)   
+    STRIP_PRINT(W2_GEBEN)
   }
 
 }
@@ -532,14 +493,14 @@ void EWCDisplay::_weatherToStrip(int8_t temperature, int8_t weather)
 
 bool EWCDisplay::begin()
 {
-  
+
   for (int i = 0; i < NUM_LEDS; i++) {
     _ledStrip[i] = 0;
   }
   _ledBus.Begin();
   _resetAndBlack();
   _displayStrip();
-  
+
   return true;
 }
 
@@ -556,11 +517,11 @@ void EWCDisplay::changeBrightness(int8_t amount)
 {
   RgbColor prevColor;
   uint8_t speed = 100;
-  
+
   _autoBrightness = false;
   if (amount > 0) {
     _defaultColor.Lighten(_defaultColor.CalculateBrightness() / amount);
-  } 
+  }
   else {
     _defaultColor.Darken(_defaultColor.CalculateBrightness() / abs(amount));
   }
@@ -572,9 +533,9 @@ void EWCDisplay::changeBrightness(int8_t amount)
     else {
       prevColor.Darken(prevColor.CalculateBrightness() / abs(amount));
     }
-    _ledBus.LinearFadePixelColor(speed, i, prevColor);
+    //_ledBus.LinearFadePixelColor(speed, i, prevColor);
   }
-  _ledBus.StartAnimating();
+  //_ledBus.StartAnimating();
 }
 
 void EWCDisplay::setBrightness(uint8_t value)
@@ -583,12 +544,12 @@ void EWCDisplay::setBrightness(uint8_t value)
   uint8_t speed = 100;
   int8_t amount;
 
-  if(value != _oldBrightness) {
+  if (value != _oldBrightness) {
     amount = value - _oldBrightness;
     _oldBrightness = value;
     if (amount > 0) {
       _defaultColor.Lighten(_defaultColor.CalculateBrightness() / amount);
-    } 
+    }
     else {
       _defaultColor.Darken(_defaultColor.CalculateBrightness() / abs(amount));
     }
@@ -596,46 +557,46 @@ void EWCDisplay::setBrightness(uint8_t value)
       prevColor = _ledBus.GetPixelColor(i);
       if (amount > 0) {
         prevColor.Lighten(prevColor.CalculateBrightness() / amount);
-      } 
+      }
       else {
         prevColor.Darken(prevColor.CalculateBrightness() / abs(amount));
       }
-      _ledBus.LinearFadePixelColor(speed, i, prevColor);
+      //_ledBus.LinearFadePixelColor(speed, i, prevColor);
     }
-    _ledBus.StartAnimating();
+    //_ledBus.StartAnimating();
   }
 }
 
 void EWCDisplay::off()
 {
   DEBUG_PRINTLN(F("switching off"));
-  if (!_ledBus.IsAnimating()) {
+  //if (!_ledBus.IsAnimating()) {
     _resetAndBlack();
     for (int i = 0; i < NUM_LEDS; i++) {
-      _ledBus.LinearFadePixelColor(1000, i, _black);
+      //_ledBus.LinearFadePixelColor(1000, i, _black);
     }
-    _ledBus.StartAnimating();
-  }
+    //_ledBus.StartAnimating();
+  //}
 }
 
 void EWCDisplay::showHeart()
 {
   DEBUG_PRINT(F("HEART..."));
-  if (!_ledBus.IsAnimating()) {
+  //if (!_ledBus.IsAnimating()) {
     _autoBrightness = false;
     _resetAndBlack();
     STRIP_PRINT(W1_HEART)
-    #if FEATURE_WEATHER()
+#if FEATURE_WEATHER()
     STRIP_PRINT(W2_HEART)
-    #endif
+#endif
     _displayStrip();
-  }
+  //}
 }
 
 void EWCDisplay::testAll()
 {
   DEBUG_PRINTLN(F("SNAKE..."));
-  if (!_ledBus.IsAnimating()) {
+  //if (!_ledBus.IsAnimating()) {
     _autoBrightness = false;
     _resetAndBlack();
     _leds[_testLED] = _defaultColor;
@@ -643,7 +604,7 @@ void EWCDisplay::testAll()
     c = _defaultColor;
     c.Darken(30);
     if (_testLED > 0) _leds[_testLED - 1] = c;
-    if (_testLED < NUM_LEDS-1) _leds[_testLED + 1] = c;
+    if (_testLED < NUM_LEDS - 1) _leds[_testLED + 1] = c;
     c.Darken(30);
     if (_testLED > 1) _leds[(_testLED - 2)] = c;
     c.Darken(30);
@@ -654,19 +615,19 @@ void EWCDisplay::testAll()
     if (_testLED > 0) _leds[_testLED - 1] = _black;
     if (_testLED > 1) _leds[(_testLED - 2)] = _black;
     if (_testLED > 2) _leds[_testLED - 3] = _black;
-    if (_testLED < NUM_LEDS-1) _leds[_testLED + 1] = _black;
+    if (_testLED < NUM_LEDS - 1) _leds[_testLED + 1] = _black;
 
     _testLED++;
     if (_testLED >= NUM_LEDS) {
       _testLED = 0;
     }
-  }
+  //}
 }
 
 void EWCDisplay::fastTest()
 {
   DEBUG_PRINTLN(F("FAST TEST..."));
-  if (!_ledBus.IsAnimating()) {
+  //if (!_ledBus.IsAnimating()) {
     _autoBrightness = false;
     _resetAndBlack();
     if (_testMinutes >= 60) {
@@ -678,25 +639,25 @@ void EWCDisplay::fastTest()
     }
     _timeToStrip(_testHours, _testMinutes);
     _testMinutes++;
-    #if FEATURE_WEATHER()
+#if FEATURE_WEATHER()
     if (_testTemperature > 30) {
       _testTemperature = -39;
       _testWeather++;
       if (_testWeather > 9) {
         _testWeather = 0;
-      }    
+      }
     }
     _weatherToStrip(_testTemperature, _testWeather);
     _testTemperature++;
-    #endif
+#endif
     _displayStripRandomColor();
-  }
+  //}
 }
 
 void EWCDisplay::makeParty()
 {
   DEBUG_PRINTLN(F("PARTY YEAH..."));
-  if (!_ledBus.IsAnimating()) {
+  //if (!_ledBus.IsAnimating()) {
     _autoBrightness = false;
     _resetAndBlack();
     for (int i = 0; i < NUM_LEDS; i++) {
@@ -704,40 +665,40 @@ void EWCDisplay::makeParty()
       _leds[i] = RgbColor(random(0, 100), random(0, 100), random(0, 100));
     }
     _showStrip();
-  }
+  //}
 }
 
 void EWCDisplay::fire()
 {
   DEBUG_PRINTLN(F("Fire..."));
-  if (!_ledBus.IsAnimating()) {
+  //if (!_ledBus.IsAnimating()) {
     _autoBrightness = false;
     _resetAndBlack();
-    
-    if (_pcnt >= 100){
-        _shiftUp();
-        _generateLine();
-        _pcnt = 0;
+
+    if (_pcnt >= 100) {
+      _shiftUp();
+      _generateLine();
+      _pcnt = 0;
     }
     _drawFrame(_pcnt);
-    _pcnt+=30;
-    
+    _pcnt += 30;
+
     _showStrip();
-  }
+  //}
 }
 
 void EWCDisplay::clockLogic()
 {
   DEBUG_PRINTLN(F("Clock..."));
-  if (!_ledBus.IsAnimating()) {
+  //if (!_ledBus.IsAnimating()) {
     _resetAndBlack();
     time_t now = time(nullptr);
     _timeToStrip(localtime(&now)->tm_hour, localtime(&now)->tm_min);
-    #if FEATURE_WEATHER()
+#if FEATURE_WEATHER()
     _weatherToStrip(Weather.getTemperature(), Weather.getWeather());
-    #endif
+#endif
     _displayStrip(_defaultColor);
-  }
+  //}
 }
 
 void EWCDisplay::setDisplay(FunctPtr fp)
@@ -756,7 +717,7 @@ void EWCDisplay::setDisplay(FunctPtr fp)
   }
   else if (_currentDisplay == makeParty) {
     _displayInterval = 120;
-  }   
+  }
   else if (_currentDisplay == showHeart) {
     _displayInterval = 10000;
     _defaultColor = _red;
@@ -769,10 +730,10 @@ void EWCDisplay::setDisplay(FunctPtr fp)
     _displayInterval = 120;
     randomSeed(analogRead(0));
     _generateLine();
-  
+
     //init all pixels to zero
-    for (unsigned char y=0;y<M_HEIGHT;y++) {
-      for(unsigned char x=0;x<M_WIDTH;x++) {
+    for (unsigned char y = 0; y < M_HEIGHT; y++) {
+      for (unsigned char x = 0; x < M_WIDTH; x++) {
         _matrix[x][y] = 0;
       }
     }
@@ -789,17 +750,18 @@ void EWCDisplay::setColor(unsigned char r, unsigned char g, unsigned char b)
 void EWCDisplay::handle()
 {
   // Are we in animation mode?
-  if (_ledBus.IsAnimating()) {
-    _ledBus.UpdateAnimations();
-    _ledBus.Show();
-  }
-  else {
+  //if (_ledBus.IsAnimating()) {
+  //  _ledBus.UpdateAnimations();
+  //  _ledBus.Show();
+  //}
+  //else {
     // nextrun overdue
     if (_lastRun + _displayInterval < millis()) {
       (_currentDisplay)();
       _lastRun = millis();
     }
-  }
+  //}
 }
 
 EWCDisplay Display = EWCDisplay();
+

@@ -1,6 +1,5 @@
 #include "WeatherParser.h"
-#include "JsonListener.h"
-#include "EWCConfig.h"
+
 typedef void (*FunctPtr)(int8_t x);
 String _lastKey = "";
 FunctPtr _temperature;
@@ -23,51 +22,62 @@ void WeatherListener::whitespace(char c) {
 }
 
 void WeatherListener::startDocument() {
-//  Serial.println("start document");
+  Serial.println("start document");
   _lastKey = "";
   _temperatureDone = false;
   _weatherDone = false;
 }
 
 void WeatherListener::key(String key) {
-  // Serial.println("key: " + key);
+  Serial.println("key: " + key);
   _lastKey = key;
 }
 
-void WeatherListener::value(String value) {
-  if (_lastKey == "day" && !_temperatureDone) {
-    DEBUG_PRINTLN("-temp: " + value);
-    _temperature((int8_t)ROUND_INT(value.toFloat()));
+void WeatherListener::value(String val) {
+  DEBUG_PRINTLN(val);
+  if(_lastKey == "day" && !_temperatureDone) {
+    DEBUG_PRINT(F("-temp: "));
+    DEBUG_PRINTLN(val);
+    
+    //_temperature((int8_t)_round_int(val.toFloat()));
+    float d = val.toFloat();
+    if(d > 0) {
+      d = d + 0.5;
+    } else {
+      d = d - 0.5;
+    }
+    int8_t x = (int8_t)((d) + ((d) > 0 ? 0.5 : -0.5));
+    _temperature((int8_t)d);
     _temperatureDone = true;
   }
   else if (_lastKey == "icon" && !_weatherDone) {
-    DEBUG_PRINTLN("-icon: " + value);
+    DEBUG_PRINTLN("-icon: " + val);
     _weatherDone = true;
-    if (value == "01d" || value == "01n" ) {
+    if (val == "01d" || val == "01n" ) {
       _weather((int8_t)WEATHER_SONNE);
     }
-    else if (value == "02d" || value == "02n") {
+    else if (val == "02d" || val == "02n") {
       _weather((int8_t)WEATHER_SONNEMITWOLKEN);
     }
-    else if (value == "03d" || value == "03n") {
+    else if (val == "03d" || val == "03n") {
       _weather((int8_t)WEATHER_WOLKEN);
     }
-    else if (value == "04d" || value == "04n") {
+    else if (val == "04d" || val == "04n") {
       _weather((int8_t)WEATHER_WOLKEN);
     }
-    else if (value == "09d" || value == "09n") {
+    else if (val == "09d" || val == "09n") {
       _weather((int8_t)WEATHER_REGEN);
     }
-    else if (value == "10d" || value == "10n") {
+    else if (val == "10d" || val == "10n") {
       _weather((int8_t)WEATHER_REGEN);
     }
-    else if (value == "11d" || value == "11n") {
+    else if (val == "11d" || val == "11n") {
       _weather((int8_t)WEATHER_STURM);
     }
-    else if (value == "13d" || value == "13n") {
+    else if (val == "13d" || val == "13n") {
       _weather((int8_t)WEATHER_SCHNEE);
     }
-    else if (value == "50d" || value == "50n") {
+    else if (val == "50d" || val == "50n") {
       _weather((int8_t)WEATHER_NEBEL);
     }
   }
@@ -92,3 +102,4 @@ void WeatherListener::startArray() {
 void WeatherListener::startObject() {
 //  Serial.println("start object. ");
 }
+

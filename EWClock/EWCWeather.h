@@ -2,7 +2,9 @@
 #define EWC_WEATHER_H
 
 #include <ESP8266WiFi.h>
-#include <JsonListener.h>
+#include "EWCConfig.h"
+
+// #include <JsonListener.h>
 #include <JsonStreamingParser.h>
 #include "WeatherParser.h"
 

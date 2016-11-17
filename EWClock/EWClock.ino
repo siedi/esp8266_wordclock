@@ -1,24 +1,17 @@
-#include <EEPROM.h>
 #include <ESP8266WiFi.h>
-#include <time.h>
-#include <ESP8266mDNS.h>
-#include <WiFiUdp.h>
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>          // WiFi Configuration Magic https://github.com/tzapu/WiFiManager 
 #include <ArduinoOTA.h>
+#include <IRremoteESP8266.h>      // IR Remote https://github.com/markszabo/IRremoteESP8266
 #include <Ticker.h>
-#include <NeoPixelBus.h>
-#include <IRremoteESP8266.h>
-#include "WebConfig.h"
+
 #include "EWCConfig.h"
-#include "ESP8266Console.h"
 #include "EWCDisplay.h"
 #if FEATURE_WEATHER()
 #include "EWCWeather.h"
-#include "EWCWebserver.h"
 #endif
 
-WebConfig* pWebConfig;
-
-// IR Remote https://github.com/markszabo/IRremoteESP8266
 IRrecv irrecv(IR_RECV_PIN);
 decode_results irDecodeResults;
 Ticker ldrTimer;
@@ -26,7 +19,7 @@ uint8_t command = NOOP;
 
 void checkLDR()
 {
-  if(Display.getAutoBrightness()) {
+  if (Display.getAutoBrightness()) {
     DEBUG_PRINT(F("LDR: "));
     int ldrVal = map(analogRead(LDR_PIN), 0, 1023, 0, 100);
     DEBUG_PRINTLN(ldrVal);
@@ -34,7 +27,7 @@ void checkLDR()
   }
 }
 
-boolean getIR(uint8_t &command) {
+boolean  getIR(uint8_t &command) {
   if (irrecv.decode(&irDecodeResults)) {
     DEBUG_PRINTLN(F("Received IR code"));
     delay(50);
@@ -113,48 +106,50 @@ void setup()
   DEBUG_PRINTLN(F("Resetting LEDs"));
   Display.begin();
 
-  // Network setup - using a library from the esp8266.com forum for now
   DEBUG_PRINTLN(F("Setting Up Network"));
-  pWebConfig = new WebConfig("BASIC WEBCONFIG v1.0", "wordclock", "12345678901234567890 ", false);
+  WiFiManager wifiManager;
+  wifiManager.autoConnect("EWClock");
 
-  // OTA setup provided by esp8266.com
   ArduinoOTA.setHostname("wordclock");
-
   ArduinoOTA.onStart([]() {
-    Console.println("Start");
+    String type;
+    if (ArduinoOTA.getCommand() == U_FLASH)
+      type = "sketch";
+    else // U_SPIFFS
+      type = "filesystem";
+
+    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+    DEBUG_PRINT(F("Start updating "));
+    DEBUG_PRINTLN(type);
   });
   ArduinoOTA.onEnd([]() {
-    Console.println("\nEnd");
+    DEBUG_PRINTLN(F("\nEnd"));
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Console.printf("Progress: %u%%\r", (progress / (total / 100)));
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
   });
   ArduinoOTA.onError([](ota_error_t error) {
-    Console.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Console.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Console.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Console.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Console.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Console.println("End Failed");
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) DEBUG_PRINTLN(F("Auth Failed"))
+    else if (error == OTA_BEGIN_ERROR) DEBUG_PRINTLN(F("Begin Failed"))
+    else if (error == OTA_CONNECT_ERROR) DEBUG_PRINTLN(F("Connect Failed"))
+    else if (error == OTA_RECEIVE_ERROR) DEBUG_PRINTLN(F("Receive Failed"))
+    else if (error == OTA_END_ERROR) DEBUG_PRINTLN(F("End Failed"))
   });
   ArduinoOTA.begin();
-
+  
+  /*
   // mDNS - go to http://wordclock.local for the network setup
   // with ArduinoOTA we get an MDNSResponder already, so we can skip the MDNS.begin
   MDNS.addService("http", "tcp", 80);
+  */
 
-  Console.begin();
-  
-  configTime(NTP_TIMEZONE * 3600, 0, const_cast<char *>(NTP_SERVER));
-  
-  // IR setup
+  configTime(NTP_TIMEZONE * 3600, NTP_DAYLIGHT * 3600, const_cast<char *>(NTP_SERVER));
+
   DEBUG_PRINTLN(F("Enabling IR Remote"));
   irrecv.enableIRIn();
 
   ldrTimer.attach(10, checkLDR);
-
-  DEBUG_PRINTLN(F("Setup Webserver"));
-  Webserver.begin(81);
 
   // Initial Display
   command = DISPLAY_CLOCK;
@@ -166,13 +161,10 @@ void setup()
 
 void loop()
 {
-  pWebConfig->ProcessHTTP();
-  Console.handle();
   ArduinoOTA.handle();
   Weather.checkWeather();
-  Webserver.handle();
   getIR(command);
-  
+
   switch (command) {
     case DISPLAY_ONOFF:
       DEBUG_PRINTLN(F("COMMAND: OFF"));
@@ -235,15 +227,14 @@ void loop()
       DEBUG_PRINTLN(F("COMMAND: color violet"));
       Display.setColor(128, 64, 128);
       break;
-      break;
     case COLOR_ORANGE:
       DEBUG_PRINTLN(F("COMMAND: color violet"));
       Display.setColor(128, 64, 0);
-      break;    
+      break;
     case COLOR_BLUE:
       DEBUG_PRINTLN(F("COMMAND: color blue"));
       Display.setColor(0, 0, 128);
-      break; 
+      break;
     case COLOR_MAGENTA:
       DEBUG_PRINTLN(F("COMMAND: color magenta"));
       Display.setColor(64, 0, 128);

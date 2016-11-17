@@ -1,5 +1,4 @@
 #include "EWCWeather.h"
-#include "EWCConfig.h"
 
 int8_t EWCWeather::_temperature = 0;
 int8_t EWCWeather::_weather = WEATHER_UNKNOWN;
@@ -32,20 +31,20 @@ void EWCWeather::requestWeather()
   }
   
   if (!weatherClient.connect(OPENWEATHER_HOST, OPENWEATHER_PORT)) {
-    DEBUG_PRINTLN("Weather connection failed");
+    DEBUG_PRINTLN(F("Weather connection failed"));
     return;
   }
 
   weatherClient.print(String("GET ") + OPENWEATHER_URL + " HTTP/1.1\r\n" +
                "Host: " + OPENWEATHER_HOST + "\r\n" + 
                "Connection: keep-alive\r\n\r\n");
-  
 }
 
 void EWCWeather::checkWeather()
 {
   // check if we need a new connection and sync time expired, then start request
   // we only have to check for the syn-periode as the client still might be connected, but we dont care.
+ 
   if (millis() > nextSyncTime) {
     DEBUG_PRINTLN("Weather start new sync");
     requestWeather();
@@ -59,7 +58,6 @@ void EWCWeather::checkWeather()
   char recieved;
   while (weatherClient.available()){
     recieved = weatherClient.read();
-    
     if (section == "header") {
       if (recieved == '\n') {
         section = "newline";
@@ -106,9 +104,9 @@ void EWCWeather::checkWeather()
     weatherClient.flush();
     weatherClient.stop();
     section = "done";
-    DEBUG_PRINT("Weather: ");
+    DEBUG_PRINT(F("Weather: "));
     DEBUG_PRINTLN(_weather);
-    DEBUG_PRINT("Temp: ");
+    DEBUG_PRINT(F("Temp: "));
     DEBUG_PRINTLN(_temperature);
   }
 }

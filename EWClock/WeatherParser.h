@@ -1,6 +1,7 @@
 #pragma once
 
 #include "JsonListener.h"
+#include "EWCConfig.h"
 
 class WeatherListener: public JsonListener {
 
