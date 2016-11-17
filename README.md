@@ -23,6 +23,8 @@ Have fun.
   * [NeoPixelBus](https://github.com/Makuna/NeoPixelBus), unfortunately the Fastled lib is not available for the ESP8266 yet.
   * [IRremoteESP8266](https://github.com/markszabo/IRremoteESP8266), obviously for the IR remote if you want to use one.
   * [JsonStreamingParser](https://github.com/squix78/json-streaming-parser), parsing the json stream from openweathermap, needs streamer as it is too large to hold completely in memory
+  * [Timezone](https://github.com/vanceb/Timezone), needed for DST, use this fork of the original version to be compatible with the ESP8266 sntp functions
+  * [Time](https://github.com/PaulStoffregen/Time), needed by Timezone, we do not use the time sync features
 4. Clone the repository
 5. Rename EWCConfig.h.example to EWCConfig.h and make your changes
 6. Compile and upload to your ESP8266 (I'm using the -12 module with 4MB flash)

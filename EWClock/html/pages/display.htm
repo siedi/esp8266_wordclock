@@ -1,0 +1,87 @@
+<h1 class="page-header">Display Settings</h1>
+<div class="row placeholders">
+  <div class="col-sm-9">
+    <form class="form-horizontal">       
+      <div class="form-group">
+        <label for="displaySelect" class="col-sm-6 control-label">Default Display</label>
+        <div class="col-sm-4">
+          <select id="displaySelect" class="form-control">
+            <option></option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="colorInput" class="col-sm-6 control-label">Default Color</label>
+        <div class="col-sm-3">
+          <input type="text" id="colorInput" class="form-control" value="">
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  function getConfigDisplay() {
+    $.getJSON('/api/config/display', function(data) {
+      $('#displaySelect').val(data.defaultDisplayId);
+      $('#colorInput').val(data.defaultColor);
+      $('#colorInput').minicolors('value', data.defaultColor);
+    }); 
+  }
+  $(document).ready(function() {
+    $.getJSON('/api/display/list', function(data) {
+      var select = $('#displaySelect').empty();
+      $.each(data.displays, function(){
+        select.append('<option value="'+ this.id +'">'+ this.name +'</option>')
+      });
+    });
+    jQuery.ajax({
+      url: "/js/jquery.minicolors.min.js",
+      dataType: "script",
+      cache: true
+    }).done(function() {
+      $('#colorInput').minicolors({
+        control: 'wheel',
+        format: 'hex',
+        inline: false,
+        position: 'bottom right',
+        changeDelay: 500,
+        change: function(value, opacity) {
+          if( !value ) return;
+          if( typeof console === 'object' ) {
+            console.log(value);
+          }
+          request = $.ajax({
+            url: '/api/config/defaultColor',
+            type: 'PUT',
+            async: true,
+            data: '{"color":"' + value + '"}'
+          });
+          request.fail(function (jqXHR, textStatus, errorThrown){
+            console.error("The following error occurred: " + textStatus);
+          });
+        },
+        theme: 'bootstrap'
+      });
+
+      getDisplayCurrent();
+    });
+      
+    $('#displaySelect').on('change', function() {
+      //alert( this.value ); // or $(this).val()
+      request = $.ajax({
+        url: '/api/config/defaultDisplay',
+        data: '{"id":' + this.value + '}',
+        type: 'PUT',
+        async: true,
+        success: function(data) {
+          getConfigDisplay();
+        }
+      });
+      request.fail(function (jqXHR, textStatus, errorThrown){
+        console.error("The following error occurred: " + textStatus);
+        getConfigDisplay();
+      });
+    });
+      
+  });
+</script>
